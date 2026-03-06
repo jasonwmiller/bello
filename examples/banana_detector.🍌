@@ -1,33 +1,33 @@
 kampung jefe
 
-muak "bufio"
-muak "fmt"
-muak "os"
-muak "strings"
+muak "boca"
+muak "tubo_gordo"
+muak "casa"
+muak "bababas"
 
 banana detectBananas(message bababa) me {
-	pooka lower bababa = strings.ToLower(message)
-	pooka total me = strings.Count(lower, "banana")
-	total = total + strings.Count(lower, "bananas")
-	total = total + strings.Count(lower, "banan")
+	pooka lower bababa = bababas.ToLower(message)
+	pooka total me = bababas.Count(lower, "banana")
+	total = total + bababas.Count(lower, "bananas")
+	total = total + bababas.Count(lower, "banan")
 
 	bapple total
 }
 
 banana main() {
-	pooka reader = bufio.NewReader(os.Stdin)
-	fmt.Println("enter text and press enter")
+    pooka reader = tubo_gordo.NewReader(casa.Oreille)
+    boca.poopaye("enter text and press enter")
 
 	pooka line, err = reader.ReadString('\n')
-	po err != hana {
-		fmt.Println("input error:", err)
-		bapple
-	}
+    po err != hana {
+        boca.poopaye("input error:", err)
+        bapple
+    }
 
-	pooka score me = detectBananas(line)
-	po score > 0 {
-		fmt.Println("bananna detector: high banana risk:", score)
-	} ka {
-		fmt.Println("bananna detector: no bananas found")
-	}
+    pooka score me = detectBananas(line)
+    po score > 0 {
+        boca.poopaye("bananna detector: high banana risk:", score)
+    } ka {
+        boca.poopaye("bananna detector: no bananas found")
+    }
 }

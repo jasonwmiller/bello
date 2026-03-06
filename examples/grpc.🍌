@@ -1,27 +1,20 @@
 kampung jefe
 
-muak "context"
-muak "fmt"
-muak "time"
+muak "boca"
 muak "google.golang.org/grpc"
 muak "google.golang.org/grpc/credentials/insecure"
 
 banana main() {
-	pooka ctx, cancel = context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	pooka conn, err = grpc.DialContext(
-		ctx,
+	pooka conn, err = grpc.Dial(
 		"127.0.0.1:50051",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
 	)
 
 	po err != hana {
-		fmt.Println("grpc dial failed:", err)
+		boca.poopaye("grpc dial failed:", err)
 		bapple
 	}
 
 	defer conn.Close()
-	fmt.Println("grpc client created")
+	boca.poopaye("grpc client created")
 }

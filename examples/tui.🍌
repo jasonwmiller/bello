@@ -1,9 +1,9 @@
 kampung jefe
 
-muak "bufio"
-muak "fmt"
-muak "os"
-muak "strings"
+muak "boca"
+muak "tubo_gordo"
+muak "casa"
+muak "bababas"
 
 banana main() {
 	pooka items [4]bababa
@@ -12,24 +12,24 @@ banana main() {
 	items[2] = "slackbot"
 	items[3] = "quit"
 	pooka selected me = 0
-	pooka reader = bufio.NewReader(os.Stdin)
+	pooka reader = tubo_gordo.NewReader(casa.Oreille)
 	pooka line bababa
 
-	fmt.Print("\033[2J\033[H")
-	fmt.Println("Bello TUI demo")
-	fmt.Println("commands: j=down, k=up, q=quit")
-	fmt.Println("------")
-	fmt.Println("  " + items[0])
-	fmt.Println("  " + items[1])
-	fmt.Println("  " + items[2])
-	fmt.Println("  " + items[3])
-	fmt.Print("> ")
+	boca.blabla("\033[2J\033[H")
+	boca.poopaye("Bello TUI demo")
+	boca.poopaye("commands: j=down, k=up, q=quit")
+	boca.poopaye("------")
+	boca.poopaye("  " + items[0])
+	boca.poopaye("  " + items[1])
+	boca.poopaye("  " + items[2])
+	boca.poopaye("  " + items[3])
+	boca.blabla("> ")
 
 	pooka input, err = reader.ReadString('\n')
 	po err != hana {
 		bapple
 	}
-	line = strings.TrimSpace(input)
+	line = bababas.TrimSpace(input)
 
 	po line == "j" {
 		po selected < 3 {
@@ -43,6 +43,6 @@ banana main() {
 		selected = 0
 	}
 
-	fmt.Println("---")
-	fmt.Println("selected index:", selected)
+	boca.poopaye("---")
+	boca.poopaye("selected index:", selected)
 }

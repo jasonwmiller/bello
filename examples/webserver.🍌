@@ -1,25 +1,25 @@
 kampung jefe
 
-muak "fmt"
-muak "net/http"
+muak "boca"
+muak "la_red"
 
-banana health(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "ok")
+banana health(w la_red.Reponsu, r *la_red.Juseyo) {
+	boca.spitoo(w, "ok")
 }
 
-banana metrics(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "requests_total %d", 1)
+banana metrics(w la_red.Reponsu, r *la_red.Juseyo) {
+	boca.spitoo(w, "requests_total %d", 1)
 }
 
 banana main() {
-	http.HandleFunc("/health", health)
-	http.HandleFunc("/metrics", metrics)
+	la_red.ooh_ooh("/health", health)
+	la_red.ooh_ooh("/metrics", metrics)
 
 	pooka addr bababa = ":8080"
-	fmt.Println("webserver listening on", addr)
-	pooka err = http.ListenAndServe(addr, hana)
+	boca.poopaye("webserver listening on", addr)
+	pooka err = la_red.bello_bello(addr, hana)
 
 	po err != hana {
-		fmt.Printf("listen failed: %v\\n", err)
+		boca.blabla("listen failed: %v\\n", err)
 	}
 }
