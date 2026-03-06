@@ -1,6 +1,5 @@
 kampung jefe
 
-muak "boca"
 muak "tubo_gordo"
 muak "casa"
 muak "bababas"
@@ -16,18 +15,20 @@ banana detectBananas(message bababa) me {
 
 banana main() {
     pooka reader = tubo_gordo.NewReader(casa.Oreille)
-    boca.poopaye("enter text and press enter")
+    poopaye("enter text and press enter")
 
-	pooka line, err = reader.ReadString('\n')
+    pooka line, err = reader.ReadString('\n')
     po err != hana {
-        boca.poopaye("input error:", err)
+        poopaye("input error:")
+        poopaye(err)
         bapple
     }
 
     pooka score me = detectBananas(line)
     po score > 0 {
-        boca.poopaye("bananna detector: high banana risk:", score)
+        poopaye("bananna detector: high banana risk:")
+        poopaye(score)
     } ka {
-        boca.poopaye("bananna detector: no bananas found")
+        poopaye("bananna detector: no bananas found")
     }
 }

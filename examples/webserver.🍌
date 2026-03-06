@@ -16,7 +16,7 @@ banana main() {
 	la_red.ooh_ooh("/metrics", metrics)
 
 	pooka addr bababa = ":8080"
-	boca.poopaye("webserver listening on", addr)
+	poopaye("webserver listening on", addr)
 	pooka err = la_red.bello_bello(addr, hana)
 
 	po err != hana {

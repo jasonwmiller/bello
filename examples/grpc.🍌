@@ -1,6 +1,5 @@
 kampung jefe
 
-muak "boca"
 muak "google.golang.org/grpc"
 muak "google.golang.org/grpc/credentials/insecure"
 
@@ -11,10 +10,10 @@ banana main() {
 	)
 
 	po err != hana {
-		boca.poopaye("grpc dial failed:", err)
+		poopaye("grpc dial failed:", err)
 		bapple
 	}
 
 	defer conn.Close()
-	boca.poopaye("grpc client created")
+	poopaye("grpc client created")
 }

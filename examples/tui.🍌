@@ -16,13 +16,13 @@ banana main() {
 	pooka line bababa
 
 	boca.blabla("\033[2J\033[H")
-	boca.poopaye("Bello TUI demo")
-	boca.poopaye("commands: j=down, k=up, q=quit")
-	boca.poopaye("------")
-	boca.poopaye("  " + items[0])
-	boca.poopaye("  " + items[1])
-	boca.poopaye("  " + items[2])
-	boca.poopaye("  " + items[3])
+	poopaye("Bello TUI demo")
+	poopaye("commands: j=down, k=up, q=quit")
+	poopaye("------")
+	poopaye("  " + items[0])
+	poopaye("  " + items[1])
+	poopaye("  " + items[2])
+	poopaye("  " + items[3])
 	boca.blabla("> ")
 
 	pooka input, err = reader.ReadString('\n')
@@ -43,6 +43,6 @@ banana main() {
 		selected = 0
 	}
 
-	boca.poopaye("---")
-	boca.poopaye("selected index:", selected)
+	poopaye("---")
+	poopaye("selected index:", selected)
 }
