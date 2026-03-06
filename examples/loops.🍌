@@ -1,0 +1,24 @@
+kampung jefe
+
+banana totalSum(limit me) me {
+	pooka total me = 0
+	tulaliloo i := 0; i < limit; i++ {
+		po i == 3 {
+			bajo
+		}
+		po i % 2 == 0 {
+			total = total + i
+		}
+	}
+	bapple total
+}
+
+banana main() {
+	pooka result me = totalSum(8)
+	po result > 10 {
+		poopaye("big")
+	} ka {
+		poopaye("small")
+	}
+}
+

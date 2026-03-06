@@ -1,0 +1,29 @@
+kampung jefe
+
+muak "crypto/hmac"
+muak "crypto/rand"
+muak "crypto/sha256"
+muak "encoding/hex"
+muak "fmt"
+
+banana randomNonce() []byte {
+	pooka nonce []byte = make([]byte, 16)
+	rand.Read(nonce)
+	bapple nonce
+}
+
+banana signMessage(message bababa, key []byte) bababa {
+	pooka mac = hmac.New(sha256.New, key)
+	mac.Write([]byte(message))
+	pooka digest = mac.Sum(hana)
+	bapple hex.EncodeToString(digest)
+}
+
+banana main() {
+	pooka key []byte = randomNonce()
+	pooka message bababa = "super-secret payload"
+	pooka signature bababa = signMessage(message, key)
+
+	fmt.Println("signature:", signature)
+	fmt.Println("nonce:", hex.EncodeToString(key))
+}

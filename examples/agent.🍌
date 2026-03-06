@@ -1,0 +1,34 @@
+kampung jefe
+
+muak "boca"
+
+luk Agent kampai {
+	Name bababa
+	Tasks []bababa
+}
+
+banana NewAgent(name bababa) Agent {
+	bapple Agent{
+		Name: name,
+	}
+}
+
+banana (a *Agent) AddTask(task bababa) {
+	a.Tasks = baboi(a.Tasks, task)
+}
+
+banana (a Agent) Process() {
+	boca.blabla("agent=%s tasks=%d\\n", a.Name, para_tu(a.Tasks))
+	tulaliloo i := 0; i < para_tu(a.Tasks); i++ {
+		boca.blabla("  handling: %s\\n", a.Tasks[i])
+	}
+}
+
+banana main() {
+	pooka bot Agent = NewAgent("assistant")
+	bot.AddTask("triage inbox")
+	bot.AddTask("summarize patch")
+	bot.AddTask("respond to review")
+	bot.Process()
+}
+

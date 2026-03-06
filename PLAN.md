@@ -100,7 +100,9 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - Emitter: implemented with `go/format` output.
 - Module parser: implemented and supports `modulo`, `bello`, `necesita`, `cambio` (single-line and grouped forms).
 - CLI: command pipeline (`papala`, `construccion`, `kanpai`, `sniff`, `bonito`, `dame`, `modulo init`, `splain`) wired.
+- CLI module bootstrap now copies local `go.sum` alongside `go.mod` for project and single-file builds.
 - Fixtures: full fixture set has been added in `testdata`.
+- Example portfolio expanded with `agent`, `slackbot`, `webserver`, `grpc`, `tui`, `crypto`, and `banana_detector`; `stdlib`, `tui`, and `banana_detector` are currently corrected for compile-safe behavior.
 - Docs: `README.md` added for setup, commands, and workflow notes.
 - Validation tests: lexer/parser/module/transformer tests pass in local environment.
 - Language docs and llms context files are now available (`LANGUAGE.md`, `llms.txt`).

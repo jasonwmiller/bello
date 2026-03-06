@@ -1,0 +1,18 @@
+kampung jefe
+
+muak "boca"
+
+banana add(a me, b me) me {
+	bapple a + b
+}
+
+banana multiply(a me, b me) me {
+	bapple a * b
+}
+
+banana main() {
+	pookie := add(2, 3)
+	total := multiply(4, 5)
+	boca.blabla("2+3 = %d\\n4*5 = %d\\n", pookie, total)
+}
+

@@ -1,0 +1,48 @@
+kampung jefe
+
+muak "bufio"
+muak "fmt"
+muak "os"
+muak "strings"
+
+banana main() {
+	pooka items [4]bababa
+	items[0] = "inbox"
+	items[1] = "agent"
+	items[2] = "slackbot"
+	items[3] = "quit"
+	pooka selected me = 0
+	pooka reader = bufio.NewReader(os.Stdin)
+	pooka line bababa
+
+	fmt.Print("\033[2J\033[H")
+	fmt.Println("Bello TUI demo")
+	fmt.Println("commands: j=down, k=up, q=quit")
+	fmt.Println("------")
+	fmt.Println("  " + items[0])
+	fmt.Println("  " + items[1])
+	fmt.Println("  " + items[2])
+	fmt.Println("  " + items[3])
+	fmt.Print("> ")
+
+	pooka input, err = reader.ReadString('\n')
+	po err != hana {
+		bapple
+	}
+	line = strings.TrimSpace(input)
+
+	po line == "j" {
+		po selected < 3 {
+			selected = selected + 1
+		}
+	} ka po line == "k" {
+		po selected > 0 {
+			selected = selected - 1
+		}
+	} ka po line == "q" {
+		selected = 0
+	}
+
+	fmt.Println("---")
+	fmt.Println("selected index:", selected)
+}

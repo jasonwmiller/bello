@@ -1,0 +1,14 @@
+kampung jefe
+
+banana factorial(n me) me {
+	po n <= 1 {
+		bapple 1
+	}
+	bapple n * factorial(n-1)
+}
+
+banana main() {
+	pooka value me = 6
+	poopaye(factorial(value))
+}
+

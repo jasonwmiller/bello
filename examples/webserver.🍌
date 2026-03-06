@@ -1,0 +1,25 @@
+kampung jefe
+
+muak "fmt"
+muak "net/http"
+
+banana health(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "ok")
+}
+
+banana metrics(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "requests_total %d", 1)
+}
+
+banana main() {
+	http.HandleFunc("/health", health)
+	http.HandleFunc("/metrics", metrics)
+
+	pooka addr bababa = ":8080"
+	fmt.Println("webserver listening on", addr)
+	pooka err = http.ListenAndServe(addr, hana)
+
+	po err != hana {
+		fmt.Printf("listen failed: %v\\n", err)
+	}
+}

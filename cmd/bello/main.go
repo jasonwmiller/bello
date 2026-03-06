@@ -301,7 +301,10 @@ func prepareModuleRoot(root, outDir string) error {
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(filepath.Join(outDir, "go.mod"), []byte(mf.RenderGoMod()), 0o644)
+		if err := os.WriteFile(filepath.Join(outDir, "go.mod"), []byte(mf.RenderGoMod()), 0o644); err != nil {
+			return err
+		}
+		return copyGoSum(root, outDir)
 	}
 	goModPath := filepath.Join(root, "go.mod")
 	if moduleLike(goModPath) {
@@ -309,7 +312,10 @@ func prepareModuleRoot(root, outDir string) error {
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(filepath.Join(outDir, "go.mod"), b, 0o644)
+		if err := os.WriteFile(filepath.Join(outDir, "go.mod"), b, 0o644); err != nil {
+			return err
+		}
+		return copyGoSum(root, outDir)
 	}
 	return os.WriteFile(filepath.Join(outDir, "go.mod"), []byte((&module.ModuleFile{
 		ModulePath: module.ModuleNameFromPath(root),
@@ -318,10 +324,34 @@ func prepareModuleRoot(root, outDir string) error {
 }
 
 func writeSingleModuleRoot(workDir, srcRoot string) error {
+	beloModPath := filepath.Join(srcRoot, "go.mod")
+	if moduleLike(beloModPath) {
+		b, err := os.ReadFile(beloModPath)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(workDir, "go.mod"), b, 0o644); err != nil {
+			return err
+		}
+		return copyGoSum(srcRoot, workDir)
+	}
+
 	return os.WriteFile(filepath.Join(workDir, "go.mod"), []byte((&module.ModuleFile{
 		ModulePath: module.ModuleNameFromPath(srcRoot),
 		GoVersion:  getGoMajorMinor(),
 	}).RenderGoMod()), 0o644)
+}
+
+func copyGoSum(srcRoot, outDir string) error {
+	goSumPath := filepath.Join(srcRoot, "go.sum")
+	if !moduleLike(goSumPath) {
+		return nil
+	}
+	b, err := os.ReadFile(goSumPath)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(outDir, "go.sum"), b, 0o644)
 }
 
 func getGoMajorMinor() string {

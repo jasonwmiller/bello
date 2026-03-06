@@ -1,0 +1,16 @@
+kampung jefe
+
+luk Point kampai {
+	X me
+	Y me
+}
+
+banana (p Point) Sum() me {
+	bapple p.X + p.Y
+}
+
+banana main() {
+	pooka p Point = Point{X: 2, Y: 3}
+	poopaye(p.Sum())
+}
+

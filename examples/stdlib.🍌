@@ -1,0 +1,13 @@
+kampung jefe
+
+muak "boca"
+
+banana greet(name bababa) {
+	boca.blabla("Hello %s\\n", name)
+}
+
+banana main() {
+	greet("Bello world")
+	pooka n me = 42
+	boca.blabla("answer = %d\\n", n)
+}

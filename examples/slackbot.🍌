@@ -1,0 +1,44 @@
+kampung jefe
+
+muak "boca"
+
+luk SlackEvent kampai {
+	User bababa
+	Channel bababa
+	Text bababa
+}
+
+banana route(event SlackEvent) bababa {
+	po event.Text == "ping" {
+		bapple "pong @" + event.User + " on " + event.Channel
+	}
+	po event.Text == "status" {
+		bapple "all systems nominal"
+	}
+	po event.Text == "help" {
+		bapple "try: ping, status, hello"
+	}
+	bapple "unrecognized command from " + event.User
+}
+
+banana summarize(events []SlackEvent) []bababa {
+	pooka replies []bababa
+	tulaliloo i := 0; i < para_tu(events); i++ {
+		replies = baboi(replies, route(events[i]))
+	}
+	bapple replies
+}
+
+banana main() {
+	pooka stream []SlackEvent = []SlackEvent{
+		SlackEvent{User: "alice", Channel: "alerts", Text: "ping"},
+		SlackEvent{User: "dev", Channel: "ops", Text: "status"},
+		SlackEvent{User: "qa", Channel: "bot", Text: "help"},
+		SlackEvent{User: "bot", Channel: "ops", Text: "noop"},
+	}
+
+	pooka responses []bababa = summarize(stream)
+	tulaliloo i := 0; i < para_tu(responses); i++ {
+		boca.blabla("[BOT] %s\\n", responses[i])
+	}
+}

@@ -1,0 +1,33 @@
+kampung jefe
+
+muak "bufio"
+muak "fmt"
+muak "os"
+muak "strings"
+
+banana detectBananas(message bababa) me {
+	pooka lower bababa = strings.ToLower(message)
+	pooka total me = strings.Count(lower, "banana")
+	total = total + strings.Count(lower, "bananas")
+	total = total + strings.Count(lower, "banan")
+
+	bapple total
+}
+
+banana main() {
+	pooka reader = bufio.NewReader(os.Stdin)
+	fmt.Println("enter text and press enter")
+
+	pooka line, err = reader.ReadString('\n')
+	po err != hana {
+		fmt.Println("input error:", err)
+		bapple
+	}
+
+	pooka score me = detectBananas(line)
+	po score > 0 {
+		fmt.Println("bananna detector: high banana risk:", score)
+	} ka {
+		fmt.Println("bananna detector: no bananas found")
+	}
+}

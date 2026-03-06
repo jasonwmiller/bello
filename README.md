@@ -30,6 +30,21 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `pkg/module` - parser for `bello.🍑` module descriptors
 - `testdata` - reference `.🍌` fixtures
 
+### Example programs
+
+- `examples/hello.🍌`
+- `examples/calculator.🍌`
+- `examples/loops.🍌`
+- `examples/structs.🍌`
+- `examples/stdlib.🍌`
+- `examples/agent.🍌`
+- `examples/slackbot.🍌`
+- `examples/webserver.🍌`
+- `examples/grpc.🍌`
+- `examples/tui.🍌`
+- `examples/crypto.🍌`
+- `examples/banana_detector.🍌`
+
 Language reference: [LANGUAGE.md](/gfs/git/bello/LANGUAGE.md)
 LLM context file: [llms.txt](/gfs/git/bello/llms.txt)
 
