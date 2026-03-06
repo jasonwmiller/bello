@@ -37,6 +37,8 @@ func main() {
 		runPapala(expectArg("papala"))
 	case "repl":
 		runRepl()
+	case "chiku":
+		runRepl()
 	case "construccion":
 		runProjectCommand(expectArgOrDot(2), "build")
 	case "kanpai":
@@ -96,6 +98,7 @@ func resolveGoBinary() string {
 func printUsage() {
 	fmt.Println("bello papala file.🍌")
 	fmt.Println("bello repl")
+	fmt.Println("bello chiku")
 	fmt.Println("bello construccion [dir]")
 	fmt.Println("bello kanpai [dir]")
 	fmt.Println("bello bonito file.🍌")

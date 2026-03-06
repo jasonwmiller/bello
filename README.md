@@ -106,6 +106,8 @@ kill "$SERVER_PID"
 ```bash
 # start a simple prompt
  go run ./cmd/bello repl
+# or minion way
+ go run ./cmd/bello chiku
 ```
 
 Supported commands:
