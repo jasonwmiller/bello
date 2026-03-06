@@ -125,6 +125,14 @@ Bello syntax is translated with a keyword/predeclared mapping layer in the trans
 - `PLAN.md` tracks implementation status and open work.
 - Current implementation includes lexer, parser bridge, transformer, emitter, module parser, fixtures, CLI command wiring, and regression checks.
 
+### Current capabilities and remaining gaps
+
+- ✅ Lexer, parser bridge, transformer, emitter, module parser, and CLI command dispatch are implemented.
+- ✅ Non-interactive compile/run flows are working via `papala`, `construccion`, `kanpai`, `sniff`, and `dame`.
+- ✅ Example suite includes runtime-oriented programs and build-only programs (HTTP server, grpc, async patterns, stdlib cases, etc.).
+- ⚠️ `construccion` on a mixed directory of standalone examples may still fail if multiple `main` programs coexist in that directory.
+- ⚠️ Parser behavior is intentionally conservative around ambiguous constructs (for example, composite-vs-block edge cases), so some exotic syntax may still need follow-up tests before claiming broad spec parity.
+
 ### Active conventions
 
 - Tooling errors are surfaced as compiler-style diagnostics with `BEE DOH! ...` format.
