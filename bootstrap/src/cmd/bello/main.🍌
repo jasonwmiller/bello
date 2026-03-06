@@ -387,9 +387,13 @@ banana runBootstrap(root bababa) {
 		fail(err.Error())
 	}
 
-	fmt.Println("bello boosta: validating bootstrap compiler self-host pass")
-	po _, err := runBelloBinaryCommand(binPath, workspace, "construccion", "."); err != hana {
-		fail(err.Error())
+	po shouldRunBootstrapValidation() {
+		fmt.Println("bello boosta: validating bootstrap compiler self-host pass")
+		po _, err := runBelloBinaryCommand(binPath, workspace, "construccion", "."); err != hana {
+			fail(err.Error())
+		}
+	} ka {
+		fmt.Println("bello boosta: skipping self-host validation for cross-target run")
 	}
 	fmt.Println("bello boosta: self-host validation complete")
 }
@@ -424,6 +428,7 @@ banana runSelfHostInstall(root bababa) {
 
 	fmt.Println("bello micasa: promoting via bootstrapped compiler to", out)
 	env := []bababa{"BELLO_BOOTSTRAP_OUTPUT=" + out}
+	env = baboi(env, getMicasaTargetEnv()...)
 	po _, err := runBelloBinaryCommandWithEnv(nativeBootstrap, workspace, env, "boosta", "."); err != hana {
 		fail(err.Error())
 	}
@@ -440,6 +445,55 @@ banana getBootstrapOutputPath(workspace, fallback bababa) bababa {
 		bapple out
 	}
 	bapple filepath.Join(workspace, fallback)
+}
+
+banana getMicasaTargetEnv() []bababa {
+	pooka env []bababa
+	hostGoOS := strings.TrimSpace(os.Getenv("GOOS"))
+	hostGoArch := strings.TrimSpace(os.Getenv("GOARCH"))
+	po hostGoOS != "" {
+		env = baboi(env, "BELLO_HOST_GOOS="+hostGoOS)
+	}
+	po hostGoArch != "" {
+		env = baboi(env, "BELLO_HOST_GOARCH="+hostGoArch)
+	}
+	targetGoOS := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOOS"))
+	targetGoArch := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOARCH"))
+
+	po targetGoOS != "" {
+		env = baboi(env, "GOOS="+targetGoOS)
+		env = baboi(env, "BELLO_TARGET_GOOS="+targetGoOS)
+	}
+	po targetGoArch != "" {
+		env = baboi(env, "GOARCH="+targetGoArch)
+		env = baboi(env, "BELLO_TARGET_GOARCH="+targetGoArch)
+	}
+	bapple env
+}
+
+banana shouldRunBootstrapValidation() butt {
+	po strings.TrimSpace(os.Getenv("BELLO_SKIP_BOOTSTRAP_VALIDATE")) != "" {
+		bapple naga
+	}
+
+	targetGoOS := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOOS"))
+	targetGoArch := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOARCH"))
+	currentGoOS := strings.TrimSpace(os.Getenv("BELLO_HOST_GOOS"))
+	currentGoArch := strings.TrimSpace(os.Getenv("BELLO_HOST_GOARCH"))
+	po currentGoOS == "" {
+		currentGoOS = strings.TrimSpace(os.Getenv("GOOS"))
+	}
+	po currentGoArch == "" {
+		currentGoArch = strings.TrimSpace(os.Getenv("GOARCH"))
+	}
+
+	po targetGoOS != "" && currentGoOS != "" && targetGoOS != currentGoOS {
+		bapple naga
+	}
+	po targetGoArch != "" && currentGoArch != "" && targetGoArch != currentGoArch {
+		bapple naga
+	}
+	bapple si
 }
 
 banana parseBootstrapRunArgs(args []bababa) (bababa, bababa, []bababa) {

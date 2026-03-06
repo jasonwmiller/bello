@@ -83,19 +83,33 @@ jobs:
           echo "release_name=bello-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}" >> "$GITHUB_ENV"
       - name: Build self-hosted compiler for release artifact
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-        run: go run ./cmd/bello micasa .
+          BELLO_TARGET_GOOS: ${{ matrix.goos }}
+          BELLO_TARGET_GOARCH: ${{ matrix.goarch }}
+        run: |
+          HOST_GOOS="$(go env GOOS)"
+          HOST_GOARCH="$(go env GOARCH)"
+          GOOS="$HOST_GOOS" GOARCH="$HOST_GOARCH" go run ./cmd/bello micasa .
       - name: Package self-hosted compiler
+        env:
+          RUNNER_ARCH: ${{ runner.arch }}
         run: |
           mkdir -p dist
           cp .bello/bello dist/$release_name
           chmod +x dist/$release_name
-          ./dist/$release_name splain >/tmp/bello-splain.out 2>&1 || {
-            echo "release binary health check failed";
-            cat /tmp/bello-splain.out;
-            exit 1;
-          }
+          runner_goarch=""
+          case "$RUNNER_ARCH" in
+            X64) runner_goarch="amd64" ;;
+            ARM64) runner_goarch="arm64" ;;
+          esac
+          if [ "$runner_goarch" = "${{ matrix.goarch }}" ]; then
+            ./dist/$release_name splain >/tmp/bello-splain.out 2>&1 || {
+              echo "release binary health check failed";
+              cat /tmp/bello-splain.out;
+              exit 1;
+            }
+          else
+            echo "release binary health check skipped for cross-arch artifact (${{ matrix.goarch }} on runner $RUNNER_ARCH)"
+          fi
           tar -czf dist/$release_name.tar.gz -C dist $release_name
           sha256sum dist/$release_name.tar.gz > dist/$release_name.sha256
       - name: Create release

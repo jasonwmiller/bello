@@ -294,6 +294,10 @@ Pushing tags matching `v*` runs release packaging from the self-hosted compiler 
 - `darwin/amd64`
 - `darwin/arm64`
 
+Release builds pass target overrides using environment variables so the self-host compile lane stays executable on each GH runner:
+
+`BELLO_TARGET_GOOS` and `BELLO_TARGET_GOARCH` are set to the matrix target by the release workflow while `go run ./cmd/bello micasa .` keeps host `GOOS`/`GOARCH` for bootstrap execution.
+
 ```bash
 git tag v0.1.0
 git push origin v0.1.0

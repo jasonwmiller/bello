@@ -387,9 +387,13 @@ func runBootstrap(root string) {
 		fail(err.Error())
 	}
 
-	fmt.Println("bello boosta: validating bootstrap compiler self-host pass")
-	if _, err := runBelloBinaryCommand(binPath, workspace, "construccion", "."); err != nil {
-		fail(err.Error())
+	if shouldRunBootstrapValidation() {
+		fmt.Println("bello boosta: validating bootstrap compiler self-host pass")
+		if _, err := runBelloBinaryCommand(binPath, workspace, "construccion", "."); err != nil {
+			fail(err.Error())
+		}
+	} else {
+		fmt.Println("bello boosta: skipping self-host validation for cross-target run")
 	}
 	fmt.Println("bello boosta: self-host validation complete")
 }
@@ -424,6 +428,7 @@ func runSelfHostInstall(root string) {
 
 	fmt.Println("bello micasa: promoting via bootstrapped compiler to", out)
 	env := []string{"BELLO_BOOTSTRAP_OUTPUT=" + out}
+	env = append(env, getMicasaTargetEnv()...)
 	if _, err := runBelloBinaryCommandWithEnv(nativeBootstrap, workspace, env, "boosta", "."); err != nil {
 		fail(err.Error())
 	}
@@ -433,6 +438,56 @@ func runSelfHostInstall(root string) {
 
 	fmt.Println("bello micasa: installed self-hosted compiler to", out)
 	fmt.Println("bello micasa: export BELLO_SELF_HOST_BIN=" + out + " to make this the active compiler")
+}
+
+func getMicasaTargetEnv() []string {
+	var env []string
+	hostGoOS := strings.TrimSpace(os.Getenv("GOOS"))
+	hostGoArch := strings.TrimSpace(os.Getenv("GOARCH"))
+	if hostGoOS != "" {
+		env = append(env, "BELLO_HOST_GOOS="+hostGoOS)
+	}
+	if hostGoArch != "" {
+		env = append(env, "BELLO_HOST_GOARCH="+hostGoArch)
+	}
+
+	targetGoOS := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOOS"))
+	targetGoArch := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOARCH"))
+
+	if targetGoOS != "" {
+		env = append(env, "GOOS="+targetGoOS)
+		env = append(env, "BELLO_TARGET_GOOS="+targetGoOS)
+	}
+	if targetGoArch != "" {
+		env = append(env, "GOARCH="+targetGoArch)
+		env = append(env, "BELLO_TARGET_GOARCH="+targetGoArch)
+	}
+	return env
+}
+
+func shouldRunBootstrapValidation() bool {
+	if strings.TrimSpace(os.Getenv("BELLO_SKIP_BOOTSTRAP_VALIDATE")) != "" {
+		return false
+	}
+
+	targetGoOS := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOOS"))
+	targetGoArch := strings.TrimSpace(os.Getenv("BELLO_TARGET_GOARCH"))
+	currentGoOS := strings.TrimSpace(os.Getenv("BELLO_HOST_GOOS"))
+	currentGoArch := strings.TrimSpace(os.Getenv("BELLO_HOST_GOARCH"))
+	if currentGoOS == "" {
+		currentGoOS = strings.TrimSpace(os.Getenv("GOOS"))
+	}
+	if currentGoArch == "" {
+		currentGoArch = strings.TrimSpace(os.Getenv("GOARCH"))
+	}
+
+	if targetGoOS != "" && currentGoOS != "" && targetGoOS != currentGoOS {
+		return false
+	}
+	if targetGoArch != "" && currentGoArch != "" && targetGoArch != currentGoArch {
+		return false
+	}
+	return true
 }
 
 func getBootstrapOutputPath(workspace, fallback string) string {
