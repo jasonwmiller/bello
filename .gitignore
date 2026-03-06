@@ -24,6 +24,8 @@ temp/
 .out/
 /.jj/
 .tools/
+.bello/
+dist/
 
 # Build outputs in repo root
 *.out

@@ -2,17 +2,97 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
   pull_request:
 
 jobs:
-  test:
+  test-and-selfhost:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
-      - name: Run tests
+      - name: Validate native pipeline
         run: go test ./...
-      - name: Validate bootstrap self-host lane
+      - name: Build native bootstrap compiler artifact cache
         run: go run ./cmd/bello bootstrap .
+      - name: Install self-hosted compiler
+        run: go run ./cmd/bello selfhost .
+      - name: Run tests through self-hosted compiler
+        env:
+          BELLO_SELF_HOST_BIN: ${{ github.workspace }}/.bello/bello
+        run: |
+          "$BELLO_SELF_HOST_BIN" kanpai examples/hello.🍌
+          "$BELLO_SELF_HOST_BIN" bootstrap .
+      - name: Validate examples with self-hosted compiler
+        env:
+          BELLO_SELF_HOST_BIN: ${{ github.workspace }}/.bello/bello
+        run: |
+          set -euo pipefail
+          echo "compiling all .🍌 examples"
+          failed=0
+          for f in $(find examples -name '*.🍌' -type f | sort); do
+            echo "build example: $f"
+            if ! "$BELLO_SELF_HOST_BIN" construccion "$f"; then
+              echo "example failed: $f"
+              failed=1
+              break
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test-and-selfhost
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Compute release filename
+        run: |
+          echo "release_name=bello-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}" >> "$GITHUB_ENV"
+      - name: Build self-hosted compiler for release artifact
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: go run ./cmd/bello selfhost .
+      - name: Package self-hosted compiler
+        run: |
+          mkdir -p dist
+          cp .bello/bello dist/$release_name
+          tar -czf dist/$release_name.tar.gz -C dist $release_name
+          sha256sum dist/$release_name.tar.gz > dist/$release_name.sha256
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/${{ env.release_name }}.tar.gz
+            dist/${{ env.release_name }}.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

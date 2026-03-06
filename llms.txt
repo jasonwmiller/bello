@@ -19,6 +19,10 @@ Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` 
 - `go run ./cmd/bello bonito <file.🍌>`
 - `go run ./cmd/bello completion [bash|zsh|fish]`
 - `go run ./cmd/bello bootstrap .`
+- `go run ./cmd/bello bootstrap-run . <command> [args...]`
+- `go run ./cmd/bello boosta-run . <command> [args...]`
+- `go run ./cmd/bello selfhost .`
+- `BELLO_SELF_HOST_BIN=/path/to/.bello/bello go run ./cmd/bello <command>` (delegates to self-hosted compiler when present)
 - `go run ./cmd/bello modulo init <name>`
 - `go run ./cmd/bello dame <pkg>`
 - `go run ./cmd/bello splain`
@@ -26,7 +30,17 @@ Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` 
 ## Current status
 - CLI, lexer/parser bridge, transformer, emitter, module parsing, and integration tests are implemented.
 - `go test ./...` is the baseline validation command.
-- CI runs `go test ./...` on push/PR.
+- CI runs native and self-hosted checks:
+  - `go test ./...`
+  - `go run ./cmd/bello bootstrap .`
+  - `go run ./cmd/bello selfhost .`
+  - `go run ./.bello/bello kanpai examples/hello.🍌` (self-hosted compile/test flow)
+  - `go run ./.bello/bello construccion <example.🍌>` for each example file
+- `./.github/workflows/ci.yml` releases these binaries:
+  - `dist/bello-<tag>-linux-amd64(.tar.gz|.sha256)`
+  - `dist/bello-<tag>-linux-arm64(.tar.gz|.sha256)`
+  - `dist/bello-<tag>-darwin-amd64(.tar.gz|.sha256)`
+  - `dist/bello-<tag>-darwin-arm64(.tar.gz|.sha256)`
 
 ## Error format
 Diagnostics use `BEE DOH! <file>:<line>:<col> — <message>` with `POOPAYE! ...` summaries on failures.

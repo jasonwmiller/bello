@@ -139,9 +139,31 @@ kill "$SERVER_PID"
 
 ```bash
 # uses a checked-in minion seed in bootstrap/src (or generate temporarily),
-# builds a native bootstrap compiler, and validates it by running
-# `bello construccion` on the same tree.
+# builds a native bootstrap compiler, validates it by running
+# `bello construccion` on the same tree, and can launch additional commands.
 go run ./cmd/bello bootstrap .
+```
+
+### Bootstrap then execute through generated compiler
+
+```bash
+# bootstrap with native compiler and immediately run an example
+go run ./cmd/bello bootstrap-run . papala examples/hello.🍌
+
+# bootstrap and build the same project
+go run ./cmd/bello bootstrap-run . construccion .
+```
+
+### Promote bootstrapped compiler to active compiler
+
+```bash
+go run ./cmd/bello selfhost .
+
+# make self-hosted compiler active for current shell
+export BELLO_SELF_HOST_BIN=$PWD/.bello/bello
+
+# then run like normal
+./.bello/bello papala examples/hello.🍌
 ```
 
 `bello bootstrap` (or `bello boosta`) is the bootstrap lane for the next phase:
@@ -228,6 +250,9 @@ slice 3 : baz
 # run bootstrap validation lane
  go run ./cmd/bello bootstrap [dir]
  go run ./cmd/bello boosta [dir]
+ go run ./cmd/bello bootstrap-run [dir] <command> [args...]
+ go run ./cmd/bello boosta-run [dir] <command> [args...]
+ go run ./cmd/bello selfhost [dir]
 ```
 
 ## Behavior and mappings
@@ -246,7 +271,35 @@ Bello syntax is translated with a keyword/predeclared mapping layer in the trans
 
 ## Supported CI
 
-`/.github/workflows/ci.yml` runs `go test ./...` on pushes and pull requests.
+`/.github/workflows/ci.yml` runs:
+- `go test ./...`
+- `go run ./cmd/bello bootstrap .`
+- `go run ./cmd/bello selfhost .`
+- Self-hosted verification with `.bello/bello`:
+  - `kanpai examples/hello.🍌`
+  - `bootstrap .`
+  - compile checks for every `examples/**/*.🍌` file
+
+## Release
+
+Pushing tags matching `v*` runs release packaging from the self-hosted compiler:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Artifacts:
+- `dist/bello-<tag>-linux-amd64.tar.gz`
+- `dist/bello-<tag>-linux-amd64.sha256`
+- `dist/bello-<tag>-linux-arm64.tar.gz`
+- `dist/bello-<tag>-linux-arm64.sha256`
+- `dist/bello-<tag>-darwin-amd64.tar.gz`
+- `dist/bello-<tag>-darwin-amd64.sha256`
+- `dist/bello-<tag>-darwin-arm64.tar.gz`
+- `dist/bello-<tag>-darwin-arm64.sha256`
+
+Linux `amd64` is the x86_64 release artifact and `arm64` targets ARM-based runners.
 
 ## Development plan status
 
