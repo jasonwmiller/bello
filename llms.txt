@@ -1,0 +1,30 @@
+# Bello Language Project
+
+Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` syntax, rewrites tokens to Go, emits Go code, then runs Go toolchain commands.
+
+## Repository layout
+- `cmd/bello/main.go` CLI dispatcher and command implementation.
+- `pkg/lexer` token stream implementation and tests.
+- `pkg/parser` Bello lexer wrapper + Go parser bridge + AST conversion.
+- `pkg/transformer` keyword/predeclared/stdlib rewriting and Go AST rewrite pass.
+- `pkg/emitter` Go source emission and position mapping utilities.
+- `pkg/module` `bello.🍑` parser and renderer.
+- `testdata/` sample Bello fixtures.
+
+## Important commands
+- `go run ./cmd/bello papala <file.🍌>`
+- `go run ./cmd/bello construccion [dir]`
+- `go run ./cmd/bello kanpai [dir]`
+- `go run ./cmd/bello sniff [dir]`
+- `go run ./cmd/bello bonito <file.🍌>`
+- `go run ./cmd/bello modulo init <name>`
+- `go run ./cmd/bello dame <pkg>`
+- `go run ./cmd/bello splain`
+
+## Current status
+- CLI, lexer/parser bridge, transformer, emitter, module parsing, and integration tests are implemented.
+- `go test ./...` is the baseline validation command.
+- CI runs `go test ./...` on push/PR.
+
+## Error format
+Diagnostics use `BEE DOH! <file>:<line>:<col> — <message>` with `POOPAYE! ...` summaries on failures.

@@ -1,6 +1,6 @@
 kampung jefe
 
-buddies Any interface {
+luk Any buddies {
 	Close() error
 }
 

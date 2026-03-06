@@ -30,6 +30,9 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `pkg/module` - parser for `bello.🍑` module descriptors
 - `testdata` - reference `.🍌` fixtures
 
+Language reference: [LANGUAGE.md](/gfs/git/bello/LANGUAGE.md)
+LLM context file: [llms.txt](/gfs/git/bello/llms.txt)
+
 ## Requirements
 
 - Go toolchain (1.23+), discovered via `PATH` or fallback paths

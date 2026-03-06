@@ -9,8 +9,10 @@ banana control(x me) {
 		poopaye("neg")
 	}
 
-	bajo
-	buttom
+    tulaliloo true {
+        bajo
+        buttom
+    }
 
 	// for forms
 	tulaliloo i := 0; i < 2; i++ {
