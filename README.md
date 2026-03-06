@@ -289,7 +289,12 @@ Bello syntax is translated with a keyword/predeclared mapping layer in the trans
 
 ## Release
 
-Pushing tags matching `v*` runs release packaging from the self-hosted compiler:
+Pushing tags matching `v*` runs release packaging from the self-hosted compiler for native targets:
+
+- `linux/amd64`
+- `linux/arm64`
+- `darwin/amd64`
+- `darwin/arm64`
 
 ```bash
 git tag v0.1.0
@@ -307,6 +312,27 @@ Artifacts:
 - `dist/bello-<tag>-darwin-arm64.sha256`
 
 Linux `amd64` is the x86_64 release artifact and `arm64` targets ARM-based runners.
+
+Install from GitHub Releases:
+
+```bash
+tag=v0.1.0
+release=bello-$tag-linux-amd64
+curl -L -o $release.tar.gz \
+  https://github.com/jasonwmiller/bello/releases/download/$tag/bello-$tag-linux-amd64.tar.gz
+tar -xzf $release.tar.gz
+chmod +x $release
+./$release splain
+```
+
+Verify checksums:
+
+```bash
+release=bello-$tag-linux-amd64
+curl -L -o $release.tar.gz.sha256 \
+  https://github.com/jasonwmiller/bello/releases/download/$tag/bello-$tag-linux-amd64.sha256
+sha256sum -c $release.tar.gz.sha256
+```
 
 ## Development plan status
 

@@ -41,6 +41,7 @@ Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` 
   - `dist/bello-<tag>-linux-arm64(.tar.gz|.sha256)`
   - `dist/bello-<tag>-darwin-amd64(.tar.gz|.sha256)`
   - `dist/bello-<tag>-darwin-arm64(.tar.gz|.sha256)`
+ - release packaging now runs `bello splain` from the target binary before creating tar/sha256 artifacts
 
 ## Error format
 Diagnostics use `BEE DOH! <file>:<line>:<col> — <message>` with `POOPAYE! ...` summaries on failures.

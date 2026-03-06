@@ -134,6 +134,7 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
   - native CI + native bootstrap pass
   - full self-hosted test + example build validation
   - tag-triggered release packaging from `.bello/bello` for Linux/macOS `amd64`/`arm64`
+  - release artifact health check (`bello splain`) during packaging
 
 ## Completion criteria
 - All tests passing locally with fixtures and CLI commands exercised
