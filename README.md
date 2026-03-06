@@ -280,6 +280,8 @@ Bello syntax is translated with a keyword/predeclared mapping layer in the trans
   - `bootstrap .`
   - compile checks for every `examples/**/*.🍌` file
 
+> Note: when `BELLO_SELF_HOST_BIN` points to `.bello/bello` (or it is found by walking parent directories), `bello` automatically routes regular commands through the self-hosted compiler. This keeps day-to-day usage non-interactive and fully automated.
+
 ## Release
 
 Pushing tags matching `v*` runs release packaging from the self-hosted compiler:
