@@ -505,19 +505,13 @@ func prepareBootstrapWorkspace(root string) (string, error) {
 			os.RemoveAll(workspace)
 			return "", fmt.Errorf("BEE DOH! -:1:1 — cannot copy bootstrap seed source: %v", err)
 		}
-	} else {
-		fmt.Println("bello bootstrap: generating Bello bootstrap source from", absRoot)
-		if err := copyBootstrapModuleFiles(absRoot, workspace); err != nil {
-			os.RemoveAll(workspace)
-			return "", fmt.Errorf("BEE DOH! -:1:1 — cannot write bootstrap module files: %v", err)
-		}
-		if err := convertGoSourcesToBello(absRoot, workspace); err != nil {
-			os.RemoveAll(workspace)
-			return "", err
-		}
+		return workspace, nil
 	}
 
-	return workspace, nil
+	msg := "BEE DOH! -:1:1 — bootstrap seed missing. create bootstrap/src with Bello sources (cmd/bello/main.🍌 + pkg/**/*.🍌) and rerun."
+	fmt.Println("bello bootstrap: failed to find bootstrap/src seed in", absRoot)
+	os.RemoveAll(workspace)
+	return "", fmt.Errorf(msg)
 }
 
 func runBootstrapRun(args []string) {

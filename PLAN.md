@@ -95,8 +95,8 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 ## Phase 10 — Self-host bootstrap
 1. Add deterministic bootstrap command for seeded Bello compiler bootstrap.
 2. Prefer committed `bootstrap/src` as bootstrap input when present.
-3. Add fallback seed conversion from Go source (`cmd/` and `pkg/`) when seed is absent.
-4. Add repeatable seed refresh tooling and document it.
+3. Require committed `bootstrap/src` as the bootstrap source of truth for build operations.
+4. Keep repeatable seed refresh tooling documented for intentional updates.
 5. Add a self-host validation pass: bootstrap binary `./cmd/bello` builds and then runs `construccion`.
 6. Add `bootstrap-run` (`boosta-run`) command that builds a bootstrap compiler and immediately runs a requested Bello subcommand on the source tree.
 7. Add `selfhost` activation flow: build/install self-hosted compiler into `.bello/bello` for opt-in native replacement.

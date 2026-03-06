@@ -32,7 +32,7 @@ Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` 
 - `go test ./...` is the baseline validation command.
 - CI runs native and self-hosted checks:
   - `go test ./...`
-  - `go run ./cmd/bello bootstrap .`
+  - `go run ./cmd/bello bootstrap .` (uses committed `bootstrap/src` Bello seed)
   - `go run ./cmd/bello selfhost .`
   - `go run ./.bello/bello kanpai examples/hello.🍌` (self-hosted compile/test flow)
   - `go run ./.bello/bello construccion <example.🍌>` for each example file

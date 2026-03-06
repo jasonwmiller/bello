@@ -138,7 +138,7 @@ kill "$SERVER_PID"
 ### Bootstrap/self-host check
 
 ```bash
-# uses a checked-in minion seed in bootstrap/src (or generate temporarily),
+# uses the committed minion seed in bootstrap/src,
 # builds a native bootstrap compiler, validates it by running
 # `bello construccion` on the same tree, and can launch additional commands.
 go run ./cmd/bello bootstrap .
@@ -167,7 +167,7 @@ export BELLO_SELF_HOST_BIN=$PWD/.bello/bello
 ```
 
 `bello bootstrap` (or `bello boosta`) is the bootstrap lane for the next phase:
-- use `bootstrap/src` (preferred) as a prebuilt minion seed, or generate one on the fly,
+- use committed `bootstrap/src` Bello compiler sources as the seed,
 - build `cmd/bello` with the current native translator,
 - run the newly built compiler through `construccion` on the same seed tree.
 
@@ -182,6 +182,8 @@ To regenerate seed files manually:
 ```bash
 go run ./tools/bootstrap_seed.go --source .
 ```
+
+Only rerun this when you intentionally want to refresh the committed Bello seed; the normal `bootstrap`/`selfhost` path requires `bootstrap/src` to already exist and will not auto-regenerate from Go.
 
 ### REPL
 
