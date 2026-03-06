@@ -7,10 +7,8 @@ Bello is a source-to-source transpiler for the Bello language (Minion-speak synt
 ```banana
 kampung jefe
 
-muak "boca"
-
 banana jefe() {
-    poopaye("i love this language")
+	poopaye("i love this language")
 }
 ```
 

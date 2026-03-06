@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"testing"
 	"sync"
+	"testing"
 )
 
 var (
-	builtOnce   sync.Once
-	buildErr    error
+	builtOnce sync.Once
+	buildErr  error
 )
 
 func TestBelloCLI_Bonito(t *testing.T) {
@@ -40,11 +40,8 @@ func TestBelloCLI_ProjectCommands(t *testing.T) {
 	if err := copyFile(fixtureSrc, targetSrc); err != nil {
 		t.Fatalf("prepare fixture: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(workDir, "go.mod"), []byte("module example.com/bello-demo\n\ngo 1.24\n"), 0o644); err != nil {
-		t.Fatalf("prepare fixture module: %v", err)
-	}
 
-	out := runBelloCommand(t, goBin, workDir, map[string]string{"GO111MODULE": "off"}, "papala", targetSrc)
+	out := runBelloCommand(t, goBin, workDir, nil, "papala", targetSrc)
 	if strings.TrimSpace(out) != "bello" {
 		t.Fatalf("papala output = %q", out)
 	}

@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -206,6 +207,9 @@ func transpileSingle(path string) (*buildResult, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := writeSingleModuleRoot(tmpDir, filepath.Dir(path)); err != nil {
+		return nil, err
+	}
 	goPath, pm, err := transpile(path, tmpDir)
 	if err != nil {
 		return nil, err
@@ -309,8 +313,25 @@ func prepareModuleRoot(root, outDir string) error {
 	}
 	return os.WriteFile(filepath.Join(outDir, "go.mod"), []byte((&module.ModuleFile{
 		ModulePath: module.ModuleNameFromPath(root),
-		GoVersion:  "1.23",
+		GoVersion:  "1.24",
 	}).RenderGoMod()), 0o644)
+}
+
+func writeSingleModuleRoot(workDir, srcRoot string) error {
+	return os.WriteFile(filepath.Join(workDir, "go.mod"), []byte((&module.ModuleFile{
+		ModulePath: module.ModuleNameFromPath(srcRoot),
+		GoVersion:  getGoMajorMinor(),
+	}).RenderGoMod()), 0o644)
+}
+
+func getGoMajorMinor() string {
+	v := runtime.Version()
+	v = strings.TrimPrefix(v, "go")
+	parts := strings.Split(v, ".")
+	if len(parts) >= 2 {
+		return parts[0] + "." + parts[1]
+	}
+	return "1.24"
 }
 
 func moduleLike(path string) bool {
