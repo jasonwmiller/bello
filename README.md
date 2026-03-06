@@ -2,6 +2,24 @@
 
 Bello is a source-to-source transpiler for the Bello language (Minion-speak syntax) targeting Go.
 
+## Quick demo
+
+```banana
+kampung jefe
+
+muak "boca"
+
+banana jefe() {
+    poopaye("i love this language")
+}
+```
+
+```bash
+go run ./cmd/bello papala testdata/hello.🍌
+# output
+bello
+```
+
 It takes `.🍌` source files, parses them through a Go-backed flow, transforms syntax/features to Go equivalents, emits Go source, and then runs Go tooling (`go run`, `go build`, `go test`, `go vet`, or `go get`).
 
 ## Repository Layout
@@ -81,6 +99,10 @@ Bello syntax is translated with a keyword/predeclared mapping layer in the trans
 ```bash
 /usr/local/go/bin/go test ./...
 ```
+
+## Supported CI
+
+`/.github/workflows/ci.yml` runs `go test ./...` on pushes and pull requests.
 
 ## Development plan status
 

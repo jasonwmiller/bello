@@ -27,3 +27,4 @@ temp/
 # Build outputs in repo root
 *.out
 *.prof
+*.o

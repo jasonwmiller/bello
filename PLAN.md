@@ -106,7 +106,7 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 
 ### Open work before delivery
 - Finalize `.gitignore` enforcement for all working dirs and wire it into CI/repro checks.
-- add end-to-end command tests (`bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`) using fixture workflows;
+- Add CLI end-to-end command tests (`bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`) via fixture projects. (added; verify in CI)
 - harden parser recovery and error messages to fully match BNF-level recovery requirements;
 - continue refining `bonito` formatting parity (spacing/comments and edge-case conversions) while keeping AST round-trip stable.
 
