@@ -52,6 +52,7 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `examples/generic_stack.🍌`
 - `examples/error_wrapping.🍌`
 - `examples/http3_server.🍌`
+- `examples/http3_client.🍌`
 
 Language reference: [LANGUAGE.md](/gfs/git/bello/LANGUAGE.md)
 LLM context file: [llms.txt](/gfs/git/bello/llms.txt)
