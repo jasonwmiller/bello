@@ -92,6 +92,14 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 2. Add CLI-end-to-end test paths and build checks
 3. Round-trip tests: parse -> format -> reparse AST
 
+## Phase 10 — Self-host bootstrap
+1. Add deterministic bootstrap command for generating temporary Bello sources from current Go compiler packages.
+2. Add two-pass check:
+   - seed compiler build from generated `cmd/`, `pkg/` Bello sources using native translator,
+   - validate the seed compiler by running its own `construccion` against generated sources.
+3. Track bootstrap command behavior and report required clean-state assumptions (module path, source subset).
+4. Extend to larger package surfaces as translation confidence increases.
+
 ## Current implementation status
 
 - Lexer and token model: implemented and ready.
@@ -116,7 +124,7 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - continue refining `bonito` formatting parity (spacing/comments and edge-case conversions) while keeping AST round-trip stable.
 
 ### Delivery status
-- CLI commands currently verified: `bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`, `bello dame`, `bello modulo init`, and `bello splain`.
+- CLI commands currently verified: `bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`, `bello dame`, `bello modulo init`, `bello bootstrap`, and `bello splain`.
 - All `examples/*.🍌` and nested `examples/http3/*.🍌` build successfully with `bello construccion`.
 
 ## Completion criteria

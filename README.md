@@ -102,6 +102,19 @@ kill "$SERVER_PID"
  go run ./cmd/bello construccion ./some/dir
 ```
 
+### Bootstrap/self-host check
+
+```bash
+# generate a temporary Bello source mirror of cmd/ and pkg/, build a native bootstrap
+# compiler, and run one native self-host validation pass
+go run ./cmd/bello bootstrap .
+```
+
+`bello bootstrap` is the bootstrap lane for the next phase:
+- convert `cmd/` and `pkg/` Go sources to `.🍌` in a temp directory,
+- build `cmd/bello` with the current native translator,
+- run the newly built compiler through `construccion` on the same generated source tree.
+
 ### REPL
 
 ```bash
@@ -162,6 +175,9 @@ slice 3 : baz
 
 # show short help text
  go run ./cmd/bello splain
+
+# run bootstrap validation lane
+ go run ./cmd/bello bootstrap [dir]
 ```
 
 ## Behavior and mappings

@@ -47,6 +47,8 @@ func main() {
 		runProjectCommand(expectArgOrDot(2), "vet")
 	case "bonito":
 		runBonito(expectArg("bonito"))
+	case "bootstrap":
+		runBootstrap(expectArgOrDot(2))
 	case "dame":
 		runGoCommand("get", expectArg("dame"))
 	case "modulo":
@@ -101,6 +103,7 @@ func printUsage() {
 	fmt.Println("bello chiku")
 	fmt.Println("bello construccion [dir]")
 	fmt.Println("bello kanpai [dir]")
+	fmt.Println("bello bootstrap [dir]")
 	fmt.Println("bello bonito file.🍌")
 	fmt.Println("bello dame pkg")
 	fmt.Println("bello modulo init name")
@@ -266,6 +269,45 @@ func runProjectCommand(path string, action string) {
 	if strings.TrimSpace(out.String()) != "" {
 		fmt.Println(out.String())
 	}
+}
+
+func runBootstrap(root string) {
+	requireGoTool()
+	absRoot := root
+	if absRoot == "" {
+		absRoot = "."
+	}
+	var err error
+	absRoot, err = filepath.Abs(absRoot)
+	if err != nil {
+		fail("BEE DOH! -:1:1 — cannot resolve bootstrap root: " + err.Error())
+	}
+
+	workspace, err := os.MkdirTemp("", "bello-bootstrap-")
+	if err != nil {
+		fail("BEE DOH! -:1:1 — cannot create bootstrap workspace: " + err.Error())
+	}
+	defer os.RemoveAll(workspace)
+
+	fmt.Println("bello bootstrap: generating Bello bootstrap source from", absRoot)
+	if err := copyBootstrapModuleFiles(absRoot, workspace); err != nil {
+		fail("BEE DOH! -:1:1 — cannot write bootstrap module files: " + err.Error())
+	}
+	if err := convertGoSourcesToBello(absRoot, workspace); err != nil {
+		fail(err.Error())
+	}
+
+	binPath := filepath.Join(workspace, "bello.bootstrap")
+	fmt.Println("bello bootstrap: building bootstrap compiler with native translator")
+	if err := buildBootstrapBinary(workspace, binPath); err != nil {
+		fail(err.Error())
+	}
+
+	fmt.Println("bello bootstrap: validating bootstrap compiler self-host pass")
+	if _, err := runBelloBinaryCommand(binPath, workspace, "construccion", "."); err != nil {
+		fail(err.Error())
+	}
+	fmt.Println("bello bootstrap: self-host validation complete")
 }
 
 func runGoCommand(args ...string) {
@@ -494,6 +536,136 @@ func parseGoToolError(output []byte, maps map[string]*transformer.PositionMap) (
 	}
 
 	return strings.TrimSpace(b.String()), len(matches)
+}
+
+func runBelloBinaryCommand(binary, workdir string, args ...string) (string, error) {
+	cmd := exec.Command(binary, args...)
+	cmd.Dir = workdir
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "GO_BIN="+resolveGoBinary())
+
+	var out strings.Builder
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	err := cmd.Run()
+	if err != nil {
+		return strings.TrimSpace(out.String()), fmt.Errorf("BEE DOH! bootstrap runner failed: %w: %s", err, strings.TrimSpace(out.String()))
+	}
+	return strings.TrimSpace(out.String()), nil
+}
+
+func buildBootstrapBinary(sourceRoot, out string) error {
+	res, err := buildProjectFromBello(sourceRoot)
+	if err != nil {
+		return fmt.Errorf("BEE DOH! bootstrap seed build failed: %v", err)
+	}
+	defer os.RemoveAll(res.Workdir)
+
+	cmd := exec.Command(resolveGoBinary(), "build", "-o", out, "./cmd/bello")
+	cmd.Dir = res.Workdir
+	var outBuilder strings.Builder
+	cmd.Stdout = &outBuilder
+	cmd.Stderr = &outBuilder
+
+	if err := cmd.Run(); err != nil {
+		msg, n := parseGoToolError([]byte(outBuilder.String()), res.Maps)
+		return wrapMappedError(msg, n, err)
+	}
+	return nil
+}
+
+func wrapMappedError(msg string, errCount int, err error) error {
+	if errCount > 0 {
+		return fmt.Errorf("BEE DOH! bootstrap translation failed: %s", msg)
+	}
+	return fmt.Errorf("BEE DOH! bootstrap translation failed: %v", err)
+}
+
+func copyBootstrapModuleFiles(sourceRoot, workspace string) error {
+	goModPath := filepath.Join(sourceRoot, "go.mod")
+	goSumPath := filepath.Join(sourceRoot, "go.sum")
+	if moduleLike(goModPath) {
+		b, err := os.ReadFile(goModPath)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(workspace, "go.mod"), b, 0o644); err != nil {
+			return err
+		}
+		if moduleLike(goSumPath) {
+			if b, err := os.ReadFile(goSumPath); err == nil {
+				if err := os.WriteFile(filepath.Join(workspace, "go.sum"), b, 0o644); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+
+	return os.WriteFile(filepath.Join(workspace, "go.mod"), []byte((&module.ModuleFile{
+		ModulePath: module.ModuleNameFromPath(sourceRoot),
+		GoVersion:  getGoMajorMinor(),
+	}).RenderGoMod()), 0o644)
+}
+
+func convertGoSourcesToBello(sourceRoot, workspace string) error {
+	return filepath.WalkDir(sourceRoot, func(path string, d os.DirEntry, errIn error) error {
+		if errIn != nil {
+			return errIn
+		}
+		if d.IsDir() {
+			if shouldSkipBootstrapDir(path) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(path) != ".go" {
+			return nil
+		}
+		if strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+
+		rel, err := filepath.Rel(sourceRoot, path)
+		if err != nil {
+			return err
+		}
+		clean := filepath.ToSlash(rel)
+		parts := strings.Split(clean, "/")
+		if len(parts) < 2 {
+			return nil
+		}
+		if parts[0] != "cmd" && parts[0] != "pkg" {
+			return nil
+		}
+
+		src, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		belloSrc, err := transformer.RewriteGoToBelloSource(string(src))
+		if err != nil {
+			return fmt.Errorf("BEE DOH! cannot translate %s: %v", path, err)
+		}
+
+		outRel := strings.TrimSuffix(rel, ".go") + ".🍌"
+		dst := filepath.Join(workspace, outRel)
+		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(dst, belloSrc, 0o644); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func shouldSkipBootstrapDir(path string) bool {
+	base := filepath.Base(path)
+	if base == ".git" || base == ".jj" || base == ".tools" || strings.HasPrefix(base, ".") {
+		return true
+	}
+	return false
 }
 
 func failWithSummary(msg string, errorCount int) {
