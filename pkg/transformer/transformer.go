@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/format"
 	goParser "go/parser"
+	"go/scanner"
 	"go/token"
 	"strconv"
 	"strings"
@@ -113,4 +114,71 @@ func RewriteGoSource(src string) ([]byte, error) {
 		return nil, err
 	}
 	return []byte(out.String()), nil
+}
+
+// RewriteGoToBelloSource returns a Bello-formatted source from Go source.
+func RewriteGoToBelloSource(src string) ([]byte, error) {
+	goSrc, err := RewriteGoSource(src)
+	if err != nil {
+		return nil, err
+	}
+	return reverseToBello(string(goSrc))
+}
+
+// reverseToBello rewrites Go keywords and predeclared identifiers back to Bello words.
+func reverseToBello(src string) ([]byte, error) {
+	data := []byte(src)
+	fset := token.NewFileSet()
+	f := fset.AddFile("bello_tmp.go", -1, len(data))
+	var scan scanner.Scanner
+	scan.Init(f, data, nil, scanner.ScanComments)
+
+	type tokenSpan struct {
+		Offset int
+		Token  token.Token
+		Text   string
+	}
+
+	var spans []tokenSpan
+	for {
+		pos, tok, lit := scan.Scan()
+		if tok == token.EOF {
+			break
+		}
+		offset := f.Offset(pos)
+		text := lit
+		if text == "" {
+			text = tok.String()
+		}
+		spans = append(spans, tokenSpan{Offset: offset, Token: tok, Text: text})
+	}
+
+	var out strings.Builder
+	last := 0
+	for _, span := range spans {
+		if span.Offset < 0 || span.Offset > len(data) {
+			return nil, fmt.Errorf("invalid token offset during bonito rewrite")
+		}
+		out.Write(data[last:span.Offset])
+		out.WriteString(rewriteBelloToken(span.Token, span.Text))
+		last = span.Offset + len(span.Text)
+	}
+	if last < len(data) {
+		out.Write(data[last:])
+	}
+	return []byte(out.String()), nil
+}
+
+func rewriteBelloToken(tok token.Token, text string) string {
+	if tok.IsKeyword() {
+		if repl, ok := goKeywordInverse[text]; ok {
+			return repl
+		}
+	}
+	if tok == token.IDENT {
+		if repl, ok := goBuiltinInverse[text]; ok {
+			return repl
+		}
+	}
+	return text
 }

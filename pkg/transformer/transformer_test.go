@@ -3,6 +3,7 @@ package transformer
 import (
 	"go/ast"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/minions/bello/pkg/parser"
@@ -51,6 +52,31 @@ banana jefe() {
 	})
 	if !callFound {
 		t.Fatalf("expected rewritten Println selector")
+	}
+}
+
+func TestRewriteGoToBelloSource(t *testing.T) {
+	in := `package main
+
+func main() {
+	var x int = 1
+	return
+}`
+
+	out, err := RewriteGoToBelloSource(in)
+	if err != nil {
+		t.Fatalf("rewrite: %v", err)
+	}
+	got := string(out)
+	for _, want := range []string{
+		"kampung main",
+		"banana main()",
+		"pooka x me = 1",
+		"bapple",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("expected bono output to contain %q, got:\n%s", want, got)
+		}
 	}
 }
 

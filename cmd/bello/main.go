@@ -108,7 +108,7 @@ func runBonito(file string) {
 		fail(err.Error())
 	}
 
-	goSrc, err := transformer.RewriteGoSource(f.Translated)
+	goSrc, err := transformer.RewriteGoToBelloSource(f.Translated)
 	if err != nil {
 		goSrc = []byte(f.Translated)
 	}

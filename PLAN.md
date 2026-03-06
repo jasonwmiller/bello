@@ -107,7 +107,7 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - Finalize `.gitignore` enforcement for all working dirs and wire it into CI/repro checks.
 - add end-to-end command tests (`bello construccion` / `bello kanpai`) when `go` tool is available;
 - harden parser recovery and error messages to fully match BNF-level recovery requirements;
-- refine `bonito` to produce canonical Bello output (currently emits formatted Go after parse).
+- `bonito` now rewrites Go-formatted output back to Bello keywords + predeclared names (`RewriteGoToBelloSource`); continue refining formatting parity with `bello` AST printer for edge cases.
 
 ## Completion criteria
 - All tests passing locally with fixtures and CLI commands exercised

@@ -61,3 +61,19 @@ var builtinMap = map[string]string{
 	"gelatin": "recover",
 	"poopaye": "println",
 }
+
+var goKeywordInverse = func() map[string]string {
+	out := make(map[string]string, len(keywordMap))
+	for bello, goName := range keywordMap {
+		out[goName] = bello
+	}
+	return out
+}()
+
+var goBuiltinInverse = func() map[string]string {
+	out := make(map[string]string, len(builtinMap))
+	for bello, goName := range builtinMap {
+		out[goName] = bello
+	}
+	return out
+}()
