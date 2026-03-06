@@ -62,6 +62,21 @@ bello/
       module.go
       module_test.go
   testdata/         — .🍌 test fixtures
+  bootstrap/        — committed Bello bootstrap seed source mirror
+    go.mod
+    cmd/
+      bello/        — bootstrap compiler entry
+        main.🍌
+    pkg/           — translator packages mirrored in Bello
+      lexer/
+      parser/
+      emitter/
+      transformer/
+      module/
+  tools/           — repository utility tools
+    bootstrap_seed.go
+  examples/        — runnable Bello example programs
+  .github/         — CI/release automation
   bello.spec.md
   bello.bnf
   go.mod
@@ -202,13 +217,19 @@ Wire everything together. Implement the toolchain commands from spec section 10:
 | Command | Action |
 |---|---|
 | `bello papala file.🍌` | transpile + `go run` |
-| `bello construccion` | transpile + `go build` |
-| `bello kanpai ./...` | transpile test files + `go test` |
+| `bello construccion [dir]` | transpile + `go build` |
+| `bello kanpai [dir]` | transpile test files + `go test` |
+| `bello sniff [dir]` | transpile + `go vet` |
 | `bello bonito file.🍌` | format (parse + pretty-print Bello) |
 | `bello dame pkg` | `go get pkg` |
 | `bello modulo init name` | create `bello.🍑` |
-| `bello sniff` | transpile + `go vet` |
 | `bello splain` | show docs |
+| `bello boosta [dir]` | bootstrap translator build + self-host validation |
+| `bello boosta-run [dir] <command> [args...]` | build bootstrap translator then immediately run command |
+| `bello micasa [dir]` | promote bootstrapped native compiler to `.bello/bello` |
+| `bello completion [bash|zsh|fish]` | print shell completion scripts |
+
+No legacy command aliases are kept; only canonical names above are supported.
 
 **Error remapping**: when `go build` or `go test` reports errors, map Go source positions back to Bello source positions using the position map from the emitter. Reformat as `BEE DOH! <file>:<line>:<col> — <message>`.
 
