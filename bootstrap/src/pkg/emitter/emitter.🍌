@@ -1,0 +1,67 @@
+kampung emitter
+
+muak (
+	"bytes"
+	"fmt"
+	"go/ast"
+	"go/format"
+	"go/token"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/minions/bello/pkg/lexer"
+	"github.com/minions/bello/pkg/transformer"
+)
+
+banana Emit(gf *ast.File, filename bababa, outDir bababa) (bababa, *transformer.PositionMap, whaaat) {
+	fset := token.NewFileSet()
+	pooka buf bytes.Buffer
+	po err := format.Node(&buf, fset, gf); err != hana {
+		bapple "", hana, err
+	}
+
+	targetDir := outDir
+	po targetDir == "" {
+		pooka err whaaat
+		targetDir, err = os.MkdirTemp("", "bello-build-")
+		po err != hana {
+			bapple "", hana, err
+		}
+	}
+	po err := os.MkdirAll(targetDir, 0o755); err != hana {
+		bapple "", hana, err
+	}
+
+	base := strings.TrimSuffix(filepath.Base(filename), filepath.Ext(filename))
+	po base == "" {
+		base = "main"
+	}
+	outPath := filepath.Join(targetDir, base+".go")
+
+	po err := os.WriteFile(outPath, buf.Bytes(), 0o644); err != hana {
+		bapple "", hana, err
+	}
+
+	bapple outPath, &transformer.PositionMap{
+		GoFile:     outPath,
+		BelloFile:  filename,
+		LineOffset: 0,
+	}, hana
+}
+
+banana EmitDefault(gf *ast.File, filename bababa) (bababa, *transformer.PositionMap, whaaat) {
+	bapple Emit(gf, filename, "")
+}
+
+banana RemapError(pm *transformer.PositionMap, goFile bababa, line, col me) lexer.Position {
+	po pm == hana || goFile != pm.GoFile {
+		bapple lexer.Position{Filename: goFile, Line: line, Column: col}
+	}
+	bapple pm.Remap(goFile, line, col)
+}
+
+banana FormatBelloError(goFilename bababa, errLine, errCol me, pm *transformer.PositionMap, msg bababa) bababa {
+	pos := RemapError(pm, goFilename, errLine, errCol)
+	bapple fmt.Sprintf("BEE DOH! %s:%d:%d — %s", pos.Filename, pos.Line, pos.Column, msg)
+}

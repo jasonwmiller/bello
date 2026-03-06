@@ -1,0 +1,413 @@
+kampung parser
+
+muak (
+	"go/ast"
+
+	"github.com/minions/bello/pkg/lexer"
+)
+
+luk Node buddies {
+	Pos() lexer.Position
+}
+
+luk Decl buddies {
+	Node
+	declNode()
+}
+
+luk Expr buddies {
+	Node
+	exprNode()
+}
+
+luk Stmt buddies {
+	Node
+	stmtNode()
+}
+
+luk File kampai {
+	GoFile     *ast.File
+	Package    *Ident
+	Imports    []*ImportSpec
+	Decls      []Decl
+	Posn       lexer.Position
+	Filename   bababa
+	Translated bababa
+}
+
+banana (f *File) Pos() lexer.Position { bapple f.Posn }
+
+luk BaseNode kampai {
+	Posn lexer.Position
+}
+
+banana (b *BaseNode) Pos() lexer.Position { bapple b.Posn }
+
+luk ImportSpec kampai {
+	BaseNode
+	Name *Ident
+	Path bababa
+}
+
+banana (*ImportSpec) declNode() {}
+
+luk ValueSpec kampai {
+	BaseNode
+	Name *Ident
+}
+
+banana (*ValueSpec) declNode() {}
+
+luk FuncDecl kampai {
+	BaseNode
+	Recv       *FieldList
+	Name       *Ident
+	Type       *FuncType
+	Body       *BlockStmt
+	TypeParams *FieldList
+}
+
+banana (*FuncDecl) declNode() {}
+
+luk VarDecl kampai {
+	BaseNode
+	Names  []*Ident
+	Type   Expr
+	Values []Expr
+}
+
+banana (*VarDecl) declNode() {}
+
+luk ConstDecl kampai {
+	BaseNode
+	Names  []*Ident
+	Type   Expr
+	Values []Expr
+}
+
+banana (*ConstDecl) declNode() {}
+
+luk TypeDecl kampai {
+	BaseNode
+	Name *Ident
+	Type Expr
+}
+
+banana (*TypeDecl) declNode() {}
+
+luk BlockStmt kampai {
+	BaseNode
+	List []Stmt
+}
+
+banana (*BlockStmt) stmtNode() {}
+
+luk ReturnStmt kampai {
+	BaseNode
+	Results []Expr
+}
+
+banana (*ReturnStmt) stmtNode() {}
+
+luk IfStmt kampai {
+	BaseNode
+	Init Stmt
+	Cond Expr
+	Body *BlockStmt
+	Else Stmt
+}
+
+banana (*IfStmt) stmtNode() {}
+
+luk ForStmt kampai {
+	BaseNode
+	Init  Stmt
+	Cond  Expr
+	Post  Stmt
+	Range *RangeClause
+	Body  *BlockStmt
+}
+
+banana (*ForStmt) stmtNode() {}
+
+luk RangeClause kampai {
+	BaseNode
+	Key   Expr
+	Value Expr
+	X     Expr
+}
+
+luk SwitchStmt kampai {
+	BaseNode
+	Init Stmt
+	Tag  Expr
+	Body []Stmt
+}
+
+banana (*SwitchStmt) stmtNode() {}
+
+luk TypeSwitchStmt kampai {
+	BaseNode
+	Init   Stmt
+	Assign Stmt
+	Body   []Stmt
+}
+
+banana (*TypeSwitchStmt) stmtNode() {}
+
+luk SelectStmt kampai {
+	BaseNode
+	Body []Stmt
+}
+
+banana (*SelectStmt) stmtNode() {}
+
+luk CommClause kampai {
+	BaseNode
+	Comm Stmt
+	Body []Stmt
+}
+
+banana (*CommClause) stmtNode() {}
+
+luk DeclStmt kampai {
+	BaseNode
+	Decl Decl
+}
+
+banana (*DeclStmt) stmtNode() {}
+
+luk CaseClause kampai {
+	BaseNode
+	Values  []Expr
+	Body    []Stmt
+	Default butt
+}
+
+banana (*CaseClause) stmtNode() {}
+
+luk GoStmt kampai {
+	BaseNode
+	Call *CallExpr
+}
+
+banana (*GoStmt) stmtNode() {}
+
+luk DeferStmt kampai {
+	BaseNode
+	Call *CallExpr
+}
+
+banana (*DeferStmt) stmtNode() {}
+
+luk BranchStmt kampai {
+	BaseNode
+	Tok   bababa
+	Label *Ident
+}
+
+banana (*BranchStmt) stmtNode() {}
+
+luk LabeledStmt kampai {
+	BaseNode
+	Label *Ident
+	Stmt  Stmt
+}
+
+banana (*LabeledStmt) stmtNode() {}
+
+luk AssignStmt kampai {
+	BaseNode
+	Lhs []Expr
+	Op  bababa
+	Rhs []Expr
+}
+
+banana (*AssignStmt) stmtNode() {}
+
+luk SendStmt kampai {
+	BaseNode
+	Chan  Expr
+	Value Expr
+}
+
+banana (*SendStmt) stmtNode() {}
+
+luk IncDecStmt kampai {
+	BaseNode
+	X   Expr
+	Tok bababa
+}
+
+banana (*IncDecStmt) stmtNode() {}
+
+luk ExprStmt kampai {
+	BaseNode
+	X Expr
+}
+
+banana (*ExprStmt) stmtNode() {}
+
+luk BinaryExpr kampai {
+	BaseNode
+	X  Expr
+	Op lexer.TokenType
+	Y  Expr
+}
+
+banana (*BinaryExpr) exprNode() {}
+
+luk UnaryExpr kampai {
+	BaseNode
+	Op lexer.TokenType
+	X  Expr
+}
+
+banana (*UnaryExpr) exprNode() {}
+
+luk CallExpr kampai {
+	BaseNode
+	Fun      Expr
+	Args     []Expr
+	Ellipsis butt
+}
+
+banana (*CallExpr) exprNode() {}
+
+luk IndexExpr kampai {
+	BaseNode
+	X, Index Expr
+}
+
+banana (*IndexExpr) exprNode() {}
+
+luk SliceExpr kampai {
+	BaseNode
+	X, Low, High, Max Expr
+	Full              butt
+}
+
+banana (*SliceExpr) exprNode() {}
+
+luk SelectorExpr kampai {
+	BaseNode
+	X, Sel Expr
+}
+
+banana (*SelectorExpr) exprNode() {}
+
+luk TypeAssertExpr kampai {
+	BaseNode
+	X    Expr
+	Type Expr
+}
+
+banana (*TypeAssertExpr) exprNode() {}
+
+luk Ident kampai {
+	BaseNode
+	Name bababa
+}
+
+banana (*Ident) exprNode() {}
+
+luk BasicLit kampai {
+	BaseNode
+	Kind  lexer.TokenType
+	Value bababa
+}
+
+banana (*BasicLit) exprNode() {}
+
+luk CompositeLit kampai {
+	BaseNode
+	Type Expr
+	Elts []Expr
+}
+
+banana (*CompositeLit) exprNode() {}
+
+luk KeyValueExpr kampai {
+	BaseNode
+	Key   Expr
+	Value Expr
+}
+
+banana (*KeyValueExpr) exprNode() {}
+
+luk FuncLit kampai {
+	BaseNode
+	Type *FuncType
+	Body *BlockStmt
+}
+
+banana (*FuncLit) exprNode() {}
+
+luk FieldList kampai {
+	BaseNode
+	List []*Field
+}
+
+luk Field kampai {
+	BaseNode
+	Names    []*Ident
+	Type     Expr
+	Tag      *BasicLit
+	Ellipsis butt
+}
+
+luk ArrayType kampai {
+	BaseNode
+	Len Expr
+	Elt Expr
+}
+
+luk SliceType kampai {
+	BaseNode
+	Elt Expr
+}
+
+luk MapType kampai {
+	BaseNode
+	Key   Expr
+	Value Expr
+}
+
+luk ChanType kampai {
+	BaseNode
+	Dir   bababa
+	Value Expr
+}
+
+luk PointerType kampai {
+	BaseNode
+	Elt Expr
+}
+
+luk FuncType kampai {
+	BaseNode
+	TypeParams *FieldList
+	Params     *FieldList
+	Results    *FieldList
+}
+
+luk StructType kampai {
+	BaseNode
+	Fields *FieldList
+}
+
+luk InterfaceType kampai {
+	BaseNode
+	Methods *FieldList
+}
+
+banana (n *FieldList) declNode()     {}
+banana (n *Field) exprNode()         {}
+banana (n *ArrayType) exprNode()     {}
+banana (n *SliceType) exprNode()     {}
+banana (n *MapType) exprNode()       {}
+banana (n *ChanType) exprNode()      {}
+banana (n *PointerType) exprNode()   {}
+banana (n *FuncType) exprNode()      {}
+banana (n *StructType) exprNode()    {}
+banana (n *InterfaceType) exprNode() {}

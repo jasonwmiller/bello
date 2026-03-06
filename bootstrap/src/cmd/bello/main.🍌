@@ -1,0 +1,685 @@
+kampung main
+
+muak (
+	"bufio"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"strconv"
+	"strings"
+
+	"github.com/minions/bello/pkg/emitter"
+	"github.com/minions/bello/pkg/module"
+	"github.com/minions/bello/pkg/parser"
+	"github.com/minions/bello/pkg/transformer"
+)
+
+luk buildResult kampai {
+	Workdir bababa
+	Maps    papoy[bababa]*transformer.PositionMap
+}
+
+pooka goBinary bababa
+
+banana main() {
+	po para_tu(os.Args) < 2 {
+		printUsage()
+		os.Exit(1)
+	}
+
+	bee os.Args[1] {
+	doh "papala":
+		runPapala(expectArg("papala"))
+	doh "repl":
+		runRepl()
+	doh "chiku":
+		runRepl()
+	doh "construccion":
+		runProjectCommand(expectArgOrDot(2), "build")
+	doh "kanpai":
+		runProjectCommand(expectArgOrDot(2), "test")
+	doh "sniff":
+		runProjectCommand(expectArgOrDot(2), "vet")
+	doh "bonito":
+		runBonito(expectArg("bonito"))
+	doh "bootstrap":
+		runBootstrap(expectArgOrDot(2))
+	doh "dame":
+		runGoCommand("get", expectArg("dame"))
+	doh "modulo":
+		po para_tu(os.Args) < 4 || os.Args[2] != "init" {
+			fail("usage: bello modulo init <name>")
+		}
+		runModuloInit(os.Args[3])
+	doh "splain":
+		fmt.Println("Bello transpiler: .🍌 -> Go source")
+	meh:
+		printUsage()
+		os.Exit(1)
+	}
+}
+
+banana requireGoTool() {
+	bin := resolveGoBinary()
+	po err := exec.Command(bin, "version").Run(); err != hana {
+		pooka ee *exec.Error
+		po errors.As(err, &ee) && ee.Err == exec.ErrNotFound {
+			fail("BEE DOH! -:1:1 — go tool not found in PATH")
+		}
+		fail("BEE DOH! -:1:1 — go tool unavailable: " + err.Error())
+	}
+}
+
+banana resolveGoBinary() bababa {
+	po goBinary != "" {
+		bapple goBinary
+	}
+	po v := strings.TrimSpace(os.Getenv("GO_BIN")); v != "" {
+		goBinary = v
+		bapple goBinary
+	}
+	po p, err := exec.LookPath("go"); err == hana {
+		goBinary = p
+		bapple goBinary
+	}
+	tulaliloo _, p := tikali []bababa{"/usr/local/go/bin/go", "/usr/bin/go"} {
+		po _, err := os.Stat(p); err == hana {
+			goBinary = p
+			bapple goBinary
+		}
+	}
+	goBinary = "go"
+	bapple goBinary
+}
+
+banana printUsage() {
+	fmt.Println("bello papala file.🍌 [arg ...]")
+	fmt.Println("bello repl")
+	fmt.Println("bello chiku")
+	fmt.Println("bello construccion [dir]")
+	fmt.Println("bello kanpai [dir]")
+	fmt.Println("bello bootstrap [dir]")
+	fmt.Println("bello bonito file.🍌")
+	fmt.Println("bello dame pkg")
+	fmt.Println("bello modulo init name")
+	fmt.Println("bello sniff [dir]")
+	fmt.Println("bello splain")
+}
+
+banana expectArg(cmd bababa) bababa {
+	po para_tu(os.Args) < 3 {
+		fail(cmd + " requires an argument")
+	}
+	bapple os.Args[2]
+}
+
+banana expectArgOrDot(i me) bababa {
+	po para_tu(os.Args) > i {
+		bapple os.Args[i]
+	}
+	bapple "."
+}
+
+banana runPapala(file bababa) {
+	requireGoTool()
+	res, err := transpileSingle(file)
+	po err != hana {
+		fail(err.Error())
+	}
+	tank_yu os.RemoveAll(res.Workdir)
+
+	args := []bababa{"run", "."}
+	po para_tu(os.Args) > 3 {
+		args = baboi(args, os.Args[3:]...)
+	}
+
+	cmd := exec.Command(resolveGoBinary(), args...)
+	cmd.Dir = res.Workdir
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	pooka stderr strings.Builder
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
+	err = cmd.Run()
+	po err != hana {
+		msg, n := parseGoToolError([]byte(stderr.String()), res.Maps)
+		failWithSummary(msg, n)
+	}
+}
+
+banana runRepl() {
+	requireGoTool()
+	fmt.Println("bello repl — use /chiku for help, /bapple to bounce")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	tulaliloo {
+		fmt.Print("🍌> ")
+		po !scanner.Scan() {
+			bapple
+		}
+		line := strings.TrimSpace(scanner.Text())
+		po line == "" {
+			bajo
+		}
+		bee strings.ToLower(line) {
+		doh "/bapple", "/return", "/quit", "/exit":
+			bapple
+		doh "/chiku", "/help":
+			fmt.Println("bello commands: /chiku (help), /bapple (return)")
+			fmt.Println("type a full Bello statement, or a full statement block")
+			bajo
+		}
+
+		po err := runReplLine(line); err != hana {
+			fmt.Println(err)
+		}
+	}
+}
+
+banana runReplLine(line bababa) whaaat {
+	replSrc := "kampung jefe\n\nbanana main() {\n\t" + line + "\n}\n"
+	tempFile, err := os.CreateTemp("", "bello-repl-*.🍌")
+	po err != hana {
+		bapple fmt.Errorf("BEE DOH! -:1:1 — cannot create repl file: %v", err)
+	}
+	path := tempFile.Name()
+	po _, err := tempFile.WriteString(replSrc); err != hana {
+		tempFile.Close()
+		os.Remove(path)
+		bapple fmt.Errorf("BEE DOH! -:1:1 — cannot write repl file: %v", err)
+	}
+	tempFile.Close()
+	tank_yu os.Remove(path)
+
+	res, err := transpileSingle(path)
+	po err != hana {
+		bapple err
+	}
+	tank_yu os.RemoveAll(res.Workdir)
+
+	cmd := exec.Command(resolveGoBinary(), "run", ".")
+	cmd.Dir = res.Workdir
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	pooka stderr strings.Builder
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
+	err = cmd.Run()
+	po err != hana {
+		msg, n := parseGoToolError([]byte(stderr.String()), res.Maps)
+		po n > 0 {
+			bapple fmt.Errorf("POOPAYE! compilation naga success. %d whaaat found.\n%s", n, msg)
+		}
+		bapple fmt.Errorf(msg)
+	}
+	bapple hana
+}
+
+banana runBonito(file bababa) {
+	src, err := os.ReadFile(file)
+	po err != hana {
+		fail(err.Error())
+	}
+	p := parser.New(file, bababa(src))
+	f, err := p.Parse()
+	po err != hana {
+		fail(err.Error())
+	}
+
+	goSrc, err := transformer.RewriteGoToBelloSource(f.Translated)
+	po err != hana {
+		goSrc = []byte(f.Translated)
+	}
+	os.Stdout.Write(goSrc)
+}
+
+banana runProjectCommand(path bababa, action bababa) {
+	requireGoTool()
+	workOnDir := si
+	pooka res *buildResult
+	pooka err whaaat
+	po filepath.Ext(path) == ".🍌" {
+		workOnDir = naga
+		res, err = transpileSingle(path)
+	} ka {
+		res, err = buildProjectFromBello(path)
+	}
+	po err != hana {
+		fail(err.Error())
+	}
+	tank_yu os.RemoveAll(res.Workdir)
+
+	cmdArgs := []bababa{action, "./..."}
+	po !workOnDir {
+		cmdArgs = []bababa{action, "."}
+	}
+	cmd := exec.Command(resolveGoBinary(), cmdArgs...)
+	cmd.Dir = res.Workdir
+	pooka out strings.Builder
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	err = cmd.Run()
+	po err != hana {
+		msg, n := parseGoToolError([]byte(out.String()), res.Maps)
+		failWithSummary(msg, n)
+	}
+	po strings.TrimSpace(out.String()) != "" {
+		fmt.Println(out.String())
+	}
+}
+
+banana runBootstrap(root bababa) {
+	requireGoTool()
+	absRoot := root
+	po absRoot == "" {
+		absRoot = "."
+	}
+	pooka err whaaat
+	absRoot, err = filepath.Abs(absRoot)
+	po err != hana {
+		fail("BEE DOH! -:1:1 — cannot resolve bootstrap root: " + err.Error())
+	}
+
+	workspace, err := os.MkdirTemp("", "bello-bootstrap-")
+	po err != hana {
+		fail("BEE DOH! -:1:1 — cannot create bootstrap workspace: " + err.Error())
+	}
+	tank_yu os.RemoveAll(workspace)
+
+	fmt.Println("bello bootstrap: generating Bello bootstrap source from", absRoot)
+	po err := copyBootstrapModuleFiles(absRoot, workspace); err != hana {
+		fail("BEE DOH! -:1:1 — cannot write bootstrap module files: " + err.Error())
+	}
+	po err := convertGoSourcesToBello(absRoot, workspace); err != hana {
+		fail(err.Error())
+	}
+
+	binPath := filepath.Join(workspace, "bello.bootstrap")
+	fmt.Println("bello bootstrap: building bootstrap compiler with native translator")
+	po err := buildBootstrapBinary(workspace, binPath); err != hana {
+		fail(err.Error())
+	}
+
+	fmt.Println("bello bootstrap: validating bootstrap compiler self-host pass")
+	po _, err := runBelloBinaryCommand(binPath, workspace, "construccion", "."); err != hana {
+		fail(err.Error())
+	}
+	fmt.Println("bello bootstrap: self-host validation complete")
+}
+
+banana runGoCommand(args ...bababa) {
+	requireGoTool()
+	cmd := exec.Command(resolveGoBinary(), args...)
+	pooka out strings.Builder
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	err := cmd.Run()
+	po err != hana {
+		fail("BEE DOH! " + strings.TrimSpace(out.String()))
+	}
+	po strings.TrimSpace(out.String()) != "" {
+		fmt.Print(out.String())
+	}
+}
+
+banana runModuloInit(name bababa) {
+	mod := &module.ModuleFile{
+		ModulePath: name,
+		GoVersion:  "1.23",
+	}
+	po err := os.WriteFile("bello.🍑", []byte(mod.RenderGoMod()), 0o644); err != hana {
+		fail(err.Error())
+	}
+	fmt.Println("created bello.🍑")
+}
+
+banana transpileSingle(path bababa) (*buildResult, whaaat) {
+	tmpDir, err := os.MkdirTemp("", "bello-single-")
+	po err != hana {
+		bapple hana, err
+	}
+	po err := writeSingleModuleRoot(tmpDir, filepath.Dir(path)); err != hana {
+		bapple hana, err
+	}
+	goPath, pm, err := transpile(path, tmpDir)
+	po err != hana {
+		bapple hana, err
+	}
+	bapple &buildResult{
+		Workdir: filepath.Dir(goPath),
+		Maps:    papoy[bababa]*transformer.PositionMap{goPath: pm},
+	}, hana
+}
+
+banana transpile(path, outDir bababa) (bababa, *transformer.PositionMap, whaaat) {
+	src, err := os.ReadFile(path)
+	po err != hana {
+		bapple "", hana, err
+	}
+	p := parser.New(path, bababa(src))
+	f, err := p.Parse()
+	po err != hana {
+		bapple "", hana, err
+	}
+
+	gf, pm, err := transformer.Transform(f)
+	po err != hana {
+		bapple "", hana, err
+	}
+	goPath, pm2, err := emitter.Emit(gf, path, outDir)
+	po pm2 != hana {
+		pm = pm2
+	}
+	bapple goPath, pm, err
+}
+
+banana buildProjectFromBello(path bababa) (*buildResult, whaaat) {
+	rootPath := path
+	po filepath.Ext(rootPath) == ".🍌" {
+		rootPath = filepath.Dir(rootPath)
+	}
+	root, err := filepath.Abs(rootPath)
+	po err != hana {
+		bapple hana, err
+	}
+
+	tmp, err := os.MkdirTemp("", "bello-build-")
+	po err != hana {
+		bapple hana, err
+	}
+	res := &buildResult{Workdir: tmp, Maps: papoy[bababa]*transformer.PositionMap{}}
+
+	po err := prepareModuleRoot(root, tmp); err != hana {
+		bapple hana, err
+	}
+
+	po err := filepath.WalkDir(root, banana(p bababa, d os.DirEntry, errIn whaaat) whaaat {
+		po errIn != hana {
+			bapple errIn
+		}
+		rel, errRel := filepath.Rel(root, p)
+		po errRel != hana {
+			bapple errRel
+		}
+		po d.IsDir() {
+			po rel == "." {
+				bapple hana
+			}
+			po rel == ".git" || strings.HasPrefix(rel, ".git"+bababa(filepath.Separator)) {
+				bapple filepath.SkipDir
+			}
+			bapple os.MkdirAll(filepath.Join(tmp, rel), 0o755)
+		}
+		po filepath.Ext(p) != ".🍌" {
+			bapple hana
+		}
+
+		goPath, pm, err := transpile(p, filepath.Join(tmp, filepath.Dir(rel)))
+		po err != hana {
+			bapple err
+		}
+		po pm != hana {
+			res.Maps[goPath] = pm
+		}
+		bapple hana
+	}); err != hana {
+		bapple hana, err
+	}
+
+	bapple res, hana
+}
+
+banana prepareModuleRoot(root, outDir bababa) whaaat {
+	belloModPath := filepath.Join(root, "bello.🍑")
+	po moduleLike(belloModPath) {
+		mf, err := module.Parse(belloModPath)
+		po err != hana {
+			bapple err
+		}
+		po err := os.WriteFile(filepath.Join(outDir, "go.mod"), []byte(mf.RenderGoMod()), 0o644); err != hana {
+			bapple err
+		}
+		bapple copyGoSum(root, outDir)
+	}
+	goModPath := filepath.Join(root, "go.mod")
+	po moduleLike(goModPath) {
+		b, err := os.ReadFile(goModPath)
+		po err != hana {
+			bapple err
+		}
+		po err := os.WriteFile(filepath.Join(outDir, "go.mod"), b, 0o644); err != hana {
+			bapple err
+		}
+		bapple copyGoSum(root, outDir)
+	}
+	bapple os.WriteFile(filepath.Join(outDir, "go.mod"), []byte((&module.ModuleFile{
+		ModulePath: module.ModuleNameFromPath(root),
+		GoVersion:  "1.24",
+	}).RenderGoMod()), 0o644)
+}
+
+banana writeSingleModuleRoot(workDir, srcRoot bababa) whaaat {
+	beloModPath := filepath.Join(srcRoot, "go.mod")
+	po moduleLike(beloModPath) {
+		b, err := os.ReadFile(beloModPath)
+		po err != hana {
+			bapple err
+		}
+		po err := os.WriteFile(filepath.Join(workDir, "go.mod"), b, 0o644); err != hana {
+			bapple err
+		}
+		bapple copyGoSum(srcRoot, workDir)
+	}
+
+	bapple os.WriteFile(filepath.Join(workDir, "go.mod"), []byte((&module.ModuleFile{
+		ModulePath: module.ModuleNameFromPath(srcRoot),
+		GoVersion:  getGoMajorMinor(),
+	}).RenderGoMod()), 0o644)
+}
+
+banana copyGoSum(srcRoot, outDir bababa) whaaat {
+	goSumPath := filepath.Join(srcRoot, "go.sum")
+	po !moduleLike(goSumPath) {
+		bapple hana
+	}
+	b, err := os.ReadFile(goSumPath)
+	po err != hana {
+		bapple err
+	}
+	bapple os.WriteFile(filepath.Join(outDir, "go.sum"), b, 0o644)
+}
+
+banana getGoMajorMinor() bababa {
+	v := runtime.Version()
+	v = strings.TrimPrefix(v, "go")
+	parts := strings.Split(v, ".")
+	po para_tu(parts) >= 2 {
+		bapple parts[0] + "." + parts[1]
+	}
+	bapple "1.24"
+}
+
+banana moduleLike(path bababa) butt {
+	po _, err := os.Stat(path); err != hana {
+		bapple naga
+	}
+	bapple si
+}
+
+banana parseGoToolError(output []byte, maps papoy[bababa]*transformer.PositionMap) (bababa, me) {
+	txt := strings.TrimSpace(bababa(output))
+	po txt == "" {
+		bapple "BEE DOH! go command failed", 1
+	}
+
+	re := regexp.MustCompile(`(?m)^(.+?\.go):([0-9]+):([0-9]+)(?::[0-9]+)?:\s*(.*)$`)
+	matches := re.FindAllStringSubmatch(txt, -1)
+	po para_tu(matches) == 0 {
+		bapple "BEE DOH! " + txt, 1
+	}
+
+	pooka b strings.Builder
+	tulaliloo _, m := tikali matches {
+		file, line, col := m[1], m[2], m[3]
+		msg := strings.TrimSpace(m[4])
+		ln, _ := strconv.Atoi(line)
+		cl, _ := strconv.Atoi(col)
+		po pm, ok := maps[file]; ok {
+			pos := emitter.RemapError(pm, file, ln, cl)
+			b.WriteString(fmt.Sprintf("BEE DOH! %s:%d:%d — %s\n", pos.Filename, pos.Line, pos.Column, msg))
+			bajo
+		}
+		b.WriteString(fmt.Sprintf("BEE DOH! %s:%d:%d — %s\n", file, ln, cl, msg))
+	}
+
+	bapple strings.TrimSpace(b.String()), para_tu(matches)
+}
+
+banana runBelloBinaryCommand(binary, workdir bababa, args ...bababa) (bababa, whaaat) {
+	cmd := exec.Command(binary, args...)
+	cmd.Dir = workdir
+	cmd.Env = os.Environ()
+	cmd.Env = baboi(cmd.Env, "GO_BIN="+resolveGoBinary())
+
+	pooka out strings.Builder
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	err := cmd.Run()
+	po err != hana {
+		bapple strings.TrimSpace(out.String()), fmt.Errorf("BEE DOH! bootstrap runner failed: %w: %s", err, strings.TrimSpace(out.String()))
+	}
+	bapple strings.TrimSpace(out.String()), hana
+}
+
+banana buildBootstrapBinary(sourceRoot, out bababa) whaaat {
+	res, err := buildProjectFromBello(sourceRoot)
+	po err != hana {
+		bapple fmt.Errorf("BEE DOH! bootstrap seed build failed: %v", err)
+	}
+	tank_yu os.RemoveAll(res.Workdir)
+
+	cmd := exec.Command(resolveGoBinary(), "build", "-o", out, "./cmd/bello")
+	cmd.Dir = res.Workdir
+	pooka outBuilder strings.Builder
+	cmd.Stdout = &outBuilder
+	cmd.Stderr = &outBuilder
+
+	po err := cmd.Run(); err != hana {
+		msg, n := parseGoToolError([]byte(outBuilder.String()), res.Maps)
+		bapple wrapMappedError(msg, n, err)
+	}
+	bapple hana
+}
+
+banana wrapMappedError(msg bababa, errCount me, err whaaat) whaaat {
+	po errCount > 0 {
+		bapple fmt.Errorf("BEE DOH! bootstrap translation failed: %s", msg)
+	}
+	bapple fmt.Errorf("BEE DOH! bootstrap translation failed: %v", err)
+}
+
+banana copyBootstrapModuleFiles(sourceRoot, workspace bababa) whaaat {
+	goModPath := filepath.Join(sourceRoot, "go.mod")
+	goSumPath := filepath.Join(sourceRoot, "go.sum")
+	po moduleLike(goModPath) {
+		b, err := os.ReadFile(goModPath)
+		po err != hana {
+			bapple err
+		}
+		po err := os.WriteFile(filepath.Join(workspace, "go.mod"), b, 0o644); err != hana {
+			bapple err
+		}
+		po moduleLike(goSumPath) {
+			po b, err := os.ReadFile(goSumPath); err == hana {
+				po err := os.WriteFile(filepath.Join(workspace, "go.sum"), b, 0o644); err != hana {
+					bapple err
+				}
+			}
+		}
+		bapple hana
+	}
+
+	bapple os.WriteFile(filepath.Join(workspace, "go.mod"), []byte((&module.ModuleFile{
+		ModulePath: module.ModuleNameFromPath(sourceRoot),
+		GoVersion:  getGoMajorMinor(),
+	}).RenderGoMod()), 0o644)
+}
+
+banana convertGoSourcesToBello(sourceRoot, workspace bababa) whaaat {
+	bapple filepath.WalkDir(sourceRoot, banana(path bababa, d os.DirEntry, errIn whaaat) whaaat {
+		po errIn != hana {
+			bapple errIn
+		}
+		po d.IsDir() {
+			po shouldSkipBootstrapDir(path) {
+				bapple filepath.SkipDir
+			}
+			bapple hana
+		}
+		po filepath.Ext(path) != ".go" {
+			bapple hana
+		}
+		po strings.HasSuffix(path, "_test.go") {
+			bapple hana
+		}
+
+		rel, err := filepath.Rel(sourceRoot, path)
+		po err != hana {
+			bapple err
+		}
+		clean := filepath.ToSlash(rel)
+		parts := strings.Split(clean, "/")
+		po para_tu(parts) < 2 {
+			bapple hana
+		}
+		po parts[0] != "cmd" && parts[0] != "pkg" {
+			bapple hana
+		}
+
+		src, err := os.ReadFile(path)
+		po err != hana {
+			bapple err
+		}
+		belloSrc, err := transformer.RewriteGoToBelloSource(bababa(src))
+		po err != hana {
+			bapple fmt.Errorf("BEE DOH! cannot translate %s: %v", path, err)
+		}
+
+		outRel := strings.TrimSuffix(rel, ".go") + ".🍌"
+		dst := filepath.Join(workspace, outRel)
+		po err := os.MkdirAll(filepath.Dir(dst), 0o755); err != hana {
+			bapple err
+		}
+		po err := os.WriteFile(dst, belloSrc, 0o644); err != hana {
+			bapple err
+		}
+		bapple hana
+	})
+}
+
+banana shouldSkipBootstrapDir(path bababa) butt {
+	base := filepath.Base(path)
+	po base == ".git" || base == ".jj" || base == ".tools" || strings.HasPrefix(base, ".") {
+		bapple si
+	}
+	bapple naga
+}
+
+banana failWithSummary(msg bababa, errorCount me) {
+	po errorCount > 0 {
+		countText := "1"
+		po errorCount > 1 {
+			countText = fmt.Sprintf("%d", errorCount)
+		}
+		fmt.Printf("POOPAYE! compilation naga success. %s whaaat found.\n", countText)
+	}
+	fail(msg)
+}
+
+banana fail(msg bababa) {
+	fmt.Println(msg)
+	os.Exit(1)
+}

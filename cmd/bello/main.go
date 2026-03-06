@@ -47,7 +47,7 @@ func main() {
 		runProjectCommand(expectArgOrDot(2), "vet")
 	case "bonito":
 		runBonito(expectArg("bonito"))
-	case "bootstrap":
+	case "bootstrap", "boosta":
 		runBootstrap(expectArgOrDot(2))
 	case "dame":
 		runGoCommand("get", expectArg("dame"))
@@ -104,6 +104,7 @@ func printUsage() {
 	fmt.Println("bello construccion [dir]")
 	fmt.Println("bello kanpai [dir]")
 	fmt.Println("bello bootstrap [dir]")
+	fmt.Println("bello boosta [dir]")
 	fmt.Println("bello bonito file.🍌")
 	fmt.Println("bello dame pkg")
 	fmt.Println("bello modulo init name")
@@ -289,12 +290,20 @@ func runBootstrap(root string) {
 	}
 	defer os.RemoveAll(workspace)
 
-	fmt.Println("bello bootstrap: generating Bello bootstrap source from", absRoot)
-	if err := copyBootstrapModuleFiles(absRoot, workspace); err != nil {
-		fail("BEE DOH! -:1:1 — cannot write bootstrap module files: " + err.Error())
-	}
-	if err := convertGoSourcesToBello(absRoot, workspace); err != nil {
-		fail(err.Error())
+	seed, hasSeed := locateBootstrapSeed(absRoot)
+	if hasSeed {
+		fmt.Println("bello bootstrap: using prebuilt minion seed in", seed)
+		if err := copyBootstrapSource(seed, workspace); err != nil {
+			fail("BEE DOH! -:1:1 — cannot copy bootstrap seed source: " + err.Error())
+		}
+	} else {
+		fmt.Println("bello bootstrap: generating Bello bootstrap source from", absRoot)
+		if err := copyBootstrapModuleFiles(absRoot, workspace); err != nil {
+			fail("BEE DOH! -:1:1 — cannot write bootstrap module files: " + err.Error())
+		}
+		if err := convertGoSourcesToBello(absRoot, workspace); err != nil {
+			fail(err.Error())
+		}
 	}
 
 	binPath := filepath.Join(workspace, "bello.bootstrap")
@@ -308,6 +317,59 @@ func runBootstrap(root string) {
 		fail(err.Error())
 	}
 	fmt.Println("bello bootstrap: self-host validation complete")
+}
+
+func locateBootstrapSeed(root string) (string, bool) {
+	candidate := filepath.Join(root, "bootstrap", "src")
+	if isBootstrapSeedDir(candidate) {
+		return candidate, true
+	}
+	if isBootstrapSeedDir(root) {
+		return root, true
+	}
+	return "", false
+}
+
+func isBootstrapSeedDir(dir string) bool {
+	if _, err := os.Stat(dir); err != nil {
+		return false
+	}
+	if _, err := os.Stat(filepath.Join(dir, "go.mod")); err != nil {
+		return false
+	}
+	_, err := os.Stat(filepath.Join(dir, "cmd", "bello", "main.🍌"))
+	if err != nil {
+		return false
+	}
+	_, err = os.Stat(filepath.Join(dir, "pkg", "parser", "parser.🍌"))
+	return err == nil
+}
+
+func copyBootstrapSource(sourceRoot, workspace string) error {
+	return filepath.WalkDir(sourceRoot, func(path string, d os.DirEntry, errIn error) error {
+		if errIn != nil {
+			return errIn
+		}
+		rel, err := filepath.Rel(sourceRoot, path)
+		if err != nil {
+			return err
+		}
+		if rel == "." {
+			return nil
+		}
+		dst := filepath.Join(workspace, rel)
+		if d.IsDir() {
+			if shouldSkipBootstrapDir(path) {
+				return filepath.SkipDir
+			}
+			return os.MkdirAll(dst, 0o755)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(dst, data, 0o644)
+	})
 }
 
 func runGoCommand(args ...string) {

@@ -93,12 +93,11 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 3. Round-trip tests: parse -> format -> reparse AST
 
 ## Phase 10 — Self-host bootstrap
-1. Add deterministic bootstrap command for generating temporary Bello sources from current Go compiler packages.
-2. Add two-pass check:
-   - seed compiler build from generated `cmd/`, `pkg/` Bello sources using native translator,
-   - validate the seed compiler by running its own `construccion` against generated sources.
-3. Track bootstrap command behavior and report required clean-state assumptions (module path, source subset).
-4. Extend to larger package surfaces as translation confidence increases.
+1. Add deterministic bootstrap command for seeded Bello compiler bootstrap.
+2. Prefer committed `bootstrap/src` as bootstrap input when present.
+3. Add fallback seed conversion from Go source (`cmd/` and `pkg/`) when seed is absent.
+4. Add repeatable seed refresh tooling and document it.
+5. Add a self-host validation pass: bootstrap binary `./cmd/bello` builds and then runs `construccion`.
 
 ## Current implementation status
 
@@ -124,8 +123,10 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - continue refining `bonito` formatting parity (spacing/comments and edge-case conversions) while keeping AST round-trip stable.
 
 ### Delivery status
-- CLI commands currently verified: `bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`, `bello dame`, `bello modulo init`, `bello bootstrap`, and `bello splain`.
+- CLI commands currently verified: `bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`, `bello dame`, `bello modulo init`, `bello bootstrap`, `bello boosta`, and `bello splain`.
 - All `examples/*.🍌` and nested `examples/http3/*.🍌` build successfully with `bello construccion`.
+- `bootstrap/src` is committed as a seed mirror and is used directly by `bello bootstrap`.
+- Seed refresh tooling is documented and available via `go run ./tools/bootstrap_seed.go --source .`.
 
 ## Completion criteria
 - All tests passing locally with fixtures and CLI commands exercised

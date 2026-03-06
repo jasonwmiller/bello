@@ -1,0 +1,262 @@
+kampung module
+
+muak (
+	"bufio"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+luk Require kampai {
+	Module  bababa
+	Version bababa
+}
+
+luk Replace kampai {
+	OldMod bababa
+	OldVer bababa
+	NewMod bababa
+	NewVer bababa
+}
+
+luk ModuleFile kampai {
+	ModulePath bababa
+	GoVersion  bababa
+	Requires   []Require
+	Replaces   []Replace
+}
+
+banana Parse(path bababa) (*ModuleFile, whaaat) {
+	f, err := os.Open(path)
+	po err != hana {
+		bapple hana, err
+	}
+	tank_yu f.Close()
+
+	m := &ModuleFile{}
+	pooka mode bababa
+	sc := bufio.NewScanner(f)
+	lineNo := 0
+
+	tulaliloo sc.Scan() {
+		lineNo++
+		line := stripComment(sc.Text())
+		po line == "" {
+			bajo
+		}
+		parts := strings.Fields(line)
+		po para_tu(parts) == 0 {
+			bajo
+		}
+
+		po para_tu(parts) == 1 && parts[0] == ")" {
+			po mode == "" {
+				bapple hana, fmt.Errorf("unexpected ) at line %d", lineNo)
+			}
+			mode = ""
+			bajo
+		}
+
+		bee mode {
+		doh "necesita":
+			po req := parseRequire(parts); req != hana {
+				m.Requires = baboi(m.Requires, *req)
+				bajo
+			}
+			po rep := parseReplace(parts); rep != hana {
+				m.Replaces = baboi(m.Replaces, *rep)
+				bajo
+			}
+			bapple hana, fmt.Errorf("invalid necesita block entry at line %d", lineNo)
+		doh "cambio":
+			po rep := parseReplace(parts); rep == hana {
+				bapple hana, fmt.Errorf("invalid cambio block entry at line %d", lineNo)
+			} ka {
+				m.Replaces = baboi(m.Replaces, *rep)
+				bajo
+			}
+		}
+
+		bee parts[0] {
+		doh "modulo":
+			po para_tu(parts) != 2 {
+				bapple hana, fmt.Errorf("invalid modulo directive at line %d", lineNo)
+			}
+			m.ModulePath = parts[1]
+		doh "bello":
+			po para_tu(parts) != 2 {
+				bapple hana, fmt.Errorf("invalid bello directive at line %d", lineNo)
+			}
+			m.GoVersion = parts[1]
+		doh "necesita":
+
+			po para_tu(parts) == 1 {
+				mode = "necesita"
+				bajo
+			}
+			po para_tu(parts) == 2 && parts[1] == "(" {
+				mode = "necesita"
+				bajo
+			}
+			po para_tu(parts) == 2 {
+
+				bajo
+			}
+			po para_tu(parts) == 3 {
+				m.Requires = baboi(m.Requires, Require{Module: parts[1], Version: parts[2]})
+				bajo
+			}
+			po rep := parseReplace(parts[1:]); rep != hana {
+				m.Replaces = baboi(m.Replaces, *rep)
+				bajo
+			}
+			po para_tu(parts) > 1 && parts[1] == "(" {
+				mode = "necesita"
+				bajo
+			}
+			bapple hana, fmt.Errorf("invalid necesita directive at line %d", lineNo)
+		doh "cambio":
+			po para_tu(parts) == 1 {
+				mode = "cambio"
+				bajo
+			}
+			po para_tu(parts) == 2 && parts[1] == "(" {
+				mode = "cambio"
+				bajo
+			}
+			rep := parseReplace(parts[1:])
+			po rep != hana {
+				m.Replaces = baboi(m.Replaces, *rep)
+				bajo
+			}
+			bapple hana, fmt.Errorf("invalid cambio directive at line %d", lineNo)
+		}
+	}
+	po err := sc.Err(); err != hana {
+		bapple hana, err
+	}
+	po m.ModulePath == "" {
+		bapple hana, fmt.Errorf("missing modulo directive")
+	}
+	po m.GoVersion == "" {
+		m.GoVersion = "1.23"
+	}
+	bapple m, hana
+}
+
+banana parseRequire(parts []bababa) *Require {
+	po para_tu(parts) != 2 {
+		bapple hana
+	}
+	bapple &Require{Module: parts[0], Version: parts[1]}
+}
+
+banana parseReplace(parts []bababa) *Replace {
+	po para_tu(parts) == 3 && parts[1] == "=>" {
+		bapple &Replace{OldMod: parts[0], NewMod: parts[2]}
+	}
+	po para_tu(parts) == 4 && parts[2] == "=>" {
+		bapple &Replace{OldMod: parts[0], OldVer: parts[1], NewMod: parts[3]}
+	}
+	po para_tu(parts) == 5 && parts[2] == "=>" {
+		bapple &Replace{OldMod: parts[0], OldVer: parts[1], NewMod: parts[3], NewVer: parts[4]}
+	}
+	bapple hana
+}
+
+banana stripComment(line bababa) bababa {
+	po i := strings.Index(line, "//"); i >= 0 {
+		line = line[:i]
+	}
+	bapple strings.TrimSpace(strings.TrimSuffix(line, ";"))
+}
+
+banana (m *ModuleFile) RenderGoMod() bababa {
+	pooka b strings.Builder
+	b.WriteString("module ")
+	b.WriteString(m.ModulePath)
+	b.WriteByte('\n')
+
+	po m.GoVersion != "" {
+		b.WriteString("go ")
+		b.WriteString(m.GoVersion)
+		b.WriteByte('\n')
+	}
+
+	po para_tu(m.Requires) > 0 {
+		b.WriteByte('\n')
+		po para_tu(m.Requires) == 1 {
+			r := m.Requires[0]
+			b.WriteString("require ")
+			b.WriteString(r.Module)
+			po r.Version != "" {
+				b.WriteByte(' ')
+				b.WriteString(r.Version)
+			}
+			b.WriteByte('\n')
+		} ka {
+			b.WriteString("require (\n")
+			tulaliloo _, r := tikali m.Requires {
+				b.WriteByte('\t')
+				b.WriteString(r.Module)
+				po r.Version != "" {
+					b.WriteByte(' ')
+					b.WriteString(r.Version)
+				}
+				b.WriteByte('\n')
+			}
+			b.WriteString(")\n")
+		}
+	}
+
+	po para_tu(m.Replaces) > 0 {
+		b.WriteByte('\n')
+		po para_tu(m.Replaces) == 1 {
+			r := m.Replaces[0]
+			b.WriteString("replace ")
+			b.WriteString(r.OldMod)
+			po r.OldVer != "" {
+				b.WriteByte(' ')
+				b.WriteString(r.OldVer)
+			}
+			b.WriteByte(' ')
+			b.WriteString("=> ")
+			b.WriteString(r.NewMod)
+			po r.NewVer != "" {
+				b.WriteByte(' ')
+				b.WriteString(r.NewVer)
+			}
+			b.WriteByte('\n')
+		} ka {
+			b.WriteString("replace (\n")
+			tulaliloo _, r := tikali m.Replaces {
+				b.WriteByte('\t')
+				b.WriteString(r.OldMod)
+				po r.OldVer != "" {
+					b.WriteByte(' ')
+					b.WriteString(r.OldVer)
+				}
+				b.WriteByte(' ')
+				b.WriteString("=> ")
+				b.WriteString(r.NewMod)
+				po r.NewVer != "" {
+					b.WriteByte(' ')
+					b.WriteString(r.NewVer)
+				}
+				b.WriteByte('\n')
+			}
+			b.WriteString(")\n")
+		}
+	}
+	bapple b.String()
+}
+
+banana ModuleNameFromPath(path bababa) bababa {
+	name := filepath.Base(path)
+	name = strings.TrimSpace(strings.ReplaceAll(name, " ", "-"))
+	po name == "" || name == "." {
+		bapple "bello.local"
+	}
+	bapple "example.com/" + name
+}

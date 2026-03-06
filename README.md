@@ -105,15 +105,28 @@ kill "$SERVER_PID"
 ### Bootstrap/self-host check
 
 ```bash
-# generate a temporary Bello source mirror of cmd/ and pkg/, build a native bootstrap
-# compiler, and run one native self-host validation pass
+# uses a checked-in minion seed in bootstrap/src (or generate temporarily),
+# builds a native bootstrap compiler, and validates it by running
+# `bello construccion` on the same tree.
 go run ./cmd/bello bootstrap .
 ```
 
-`bello bootstrap` is the bootstrap lane for the next phase:
-- convert `cmd/` and `pkg/` Go sources to `.🍌` in a temp directory,
+`bello bootstrap` (or `bello boosta`) is the bootstrap lane for the next phase:
+- use `bootstrap/src` (preferred) as a prebuilt minion seed, or generate one on the fly,
 - build `cmd/bello` with the current native translator,
-- run the newly built compiler through `construccion` on the same generated source tree.
+- run the newly built compiler through `construccion` on the same seed tree.
+
+Seed layout:
+
+- `bootstrap/src/go.mod`
+- `bootstrap/src/cmd/bello/main.🍌`
+- `bootstrap/src/pkg/...` translator packages
+
+To regenerate seed files manually:
+
+```bash
+go run ./tools/bootstrap_seed.go --source .
+```
 
 ### REPL
 
@@ -178,6 +191,7 @@ slice 3 : baz
 
 # run bootstrap validation lane
  go run ./cmd/bello bootstrap [dir]
+ go run ./cmd/bello boosta [dir]
 ```
 
 ## Behavior and mappings

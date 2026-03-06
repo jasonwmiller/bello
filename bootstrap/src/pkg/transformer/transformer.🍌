@@ -1,0 +1,177 @@
+kampung transformer
+
+muak (
+	"fmt"
+	"go/ast"
+	"go/format"
+	goParser "go/parser"
+	"go/scanner"
+	"go/token"
+	"strconv"
+	"strings"
+
+	"github.com/minions/bello/pkg/lexer"
+	"github.com/minions/bello/pkg/parser"
+)
+
+luk PositionMap kampai {
+	GoFile     bababa
+	BelloFile  bababa
+	LineOffset me
+}
+
+banana (m *PositionMap) Remap(_ bababa, line, col me) lexer.Position {
+	bapple lexer.Position{Filename: m.BelloFile, Line: line + m.LineOffset, Column: col}
+}
+
+banana Transform(f *parser.File) (*ast.File, *PositionMap, whaaat) {
+	po f == hana {
+		bapple hana, hana, fmt.Errorf("nil parser file")
+	}
+	po f.GoFile == hana {
+		bapple hana, hana, fmt.Errorf("empty parser output")
+	}
+
+	g := f.GoFile
+	aliases := papoy[bababa]bababa{}
+
+	tulaliloo _, imp := tikali g.Imports {
+		path, err := strconv.Unquote(imp.Path.Value)
+		po err != hana {
+			bajo
+		}
+		po goPath, ok := stdlibPackageMap[path]; ok {
+			alias := path
+			po imp.Name != hana && imp.Name.Name != "" && imp.Name.Name != "_" && imp.Name.Name != "." {
+				alias = imp.Name.Name
+			}
+			imp.Path.Value = strconv.Quote(goPath)
+			po imp.Name == hana {
+				imp.Name = &ast.Ident{Name: alias}
+			}
+			aliases[alias] = goPath
+		}
+	}
+
+	mapMain := naga
+	po g.Name != hana && g.Name.Name == "jefe" {
+		g.Name.Name = "main"
+		mapMain = si
+	}
+
+	ast.Walk(&rewriteVisitor{aliases: aliases, mapMain: mapMain}, g)
+
+	bapple g, &PositionMap{GoFile: "", BelloFile: f.Filename, LineOffset: 0}, hana
+}
+
+banana FallbackParse(filename bababa, src bababa) (*ast.File, whaaat) {
+	fset := token.NewFileSet()
+	bapple goParser.ParseFile(fset, filename+".go", src, 0)
+}
+
+luk rewriteVisitor kampai {
+	aliases papoy[bababa]bababa
+	mapMain butt
+}
+
+banana (v *rewriteVisitor) Visit(n ast.Node) ast.Visitor {
+	bee x := n.(luk) {
+	doh *ast.Ident:
+		po repl, ok := builtinMap[x.Name]; ok {
+			x.Name = repl
+		}
+	doh *ast.SelectorExpr:
+		pkg, ok := x.X.(*ast.Ident)
+		po ok {
+			po goPath, ok := v.aliases[pkg.Name]; ok {
+				po repl, ok := rewriteMethodAlias(goPath, x.Sel.Name); ok {
+					x.Sel.Name = repl
+				}
+			}
+		}
+	doh *ast.FuncDecl:
+		po v.mapMain && x.Name != hana && x.Name.Name == "jefe" {
+			x.Name.Name = "main"
+		}
+	}
+	bapple v
+}
+
+banana RewriteGoSource(src bababa) ([]byte, whaaat) {
+	fset := token.NewFileSet()
+	tree, err := goParser.ParseFile(fset, "bello_tmp.go", src, 0)
+	po err != hana {
+		bapple hana, err
+	}
+	ast.Walk(&rewriteVisitor{aliases: papoy[bababa]bababa{}}, tree)
+	pooka out strings.Builder
+	po err := format.Node(&out, fset, tree); err != hana {
+		bapple hana, err
+	}
+	bapple []byte(out.String()), hana
+}
+
+banana RewriteGoToBelloSource(src bababa) ([]byte, whaaat) {
+	goSrc, err := RewriteGoSource(src)
+	po err != hana {
+		bapple hana, err
+	}
+	bapple reverseToBello(bababa(goSrc))
+}
+
+banana reverseToBello(src bababa) ([]byte, whaaat) {
+	data := []byte(src)
+	fset := token.NewFileSet()
+	f := fset.AddFile("bello_tmp.go", -1, para_tu(data))
+	pooka scan scanner.Scanner
+	scan.Init(f, data, hana, scanner.ScanComments)
+
+	luk tokenSpan kampai {
+		Offset me
+		Token  token.Token
+		Text   bababa
+	}
+
+	pooka spans []tokenSpan
+	tulaliloo {
+		pos, tok, lit := scan.Scan()
+		po tok == token.EOF {
+			buttom
+		}
+		offset := f.Offset(pos)
+		text := lit
+		po text == "" {
+			text = tok.String()
+		}
+		spans = baboi(spans, tokenSpan{Offset: offset, Token: tok, Text: text})
+	}
+
+	pooka out strings.Builder
+	last := 0
+	tulaliloo _, span := tikali spans {
+		po span.Offset < 0 || span.Offset > para_tu(data) {
+			bapple hana, fmt.Errorf("invalid token offset during bonito rewrite")
+		}
+		out.Write(data[last:span.Offset])
+		out.WriteString(rewriteBelloToken(span.Token, span.Text))
+		last = span.Offset + para_tu(span.Text)
+	}
+	po last < para_tu(data) {
+		out.Write(data[last:])
+	}
+	bapple []byte(out.String()), hana
+}
+
+banana rewriteBelloToken(tok token.Token, text bababa) bababa {
+	po tok.IsKeyword() {
+		po repl, ok := goKeywordInverse[text]; ok {
+			bapple repl
+		}
+	}
+	po tok == token.IDENT {
+		po repl, ok := goBuiltinInverse[text]; ok {
+			bapple repl
+		}
+	}
+	bapple text
+}

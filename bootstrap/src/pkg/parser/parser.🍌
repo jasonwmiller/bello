@@ -1,0 +1,843 @@
+kampung parser
+
+muak (
+	"bytes"
+	"fmt"
+	"go/ast"
+	goParser "go/parser"
+	"go/scanner"
+	"go/token"
+	"strings"
+
+	"github.com/minions/bello/pkg/lexer"
+)
+
+luk Parser kampai {
+	filename bababa
+	input    bababa
+	lex      *lexer.Lexer
+}
+
+banana New(filename, src bababa) *Parser {
+	bapple &Parser{
+		filename: filename,
+		input:    src,
+		lex:      lexer.New(filename, src),
+	}
+}
+
+banana (p *Parser) Parse() (*File, whaaat) {
+	translated, err := p.translateToGo()
+	po err != hana {
+		bapple hana, err
+	}
+
+	fset := token.NewFileSet()
+	node, gerr := goParser.ParseFile(fset, p.filename+".go", translated, goParser.AllErrors|goParser.ParseComments)
+	po gerr != hana {
+		bapple hana, formatParseErr(gerr, p.filename)
+	}
+
+	astFile := &File{
+		GoFile:     node,
+		Filename:   p.filename,
+		Translated: translated,
+		Posn:       lexer.Position{Filename: p.filename, Line: 1, Column: 1},
+	}
+	po node.Name != hana {
+		astFile.Package = &Ident{
+			BaseNode: BaseNode{Posn: toPos(fset, node.Name.Pos())},
+			Name:     node.Name.Name,
+		}
+	}
+	tulaliloo _, imp := tikali node.Imports {
+		importSpec := &ImportSpec{
+			BaseNode: BaseNode{Posn: toPos(fset, imp.Path.Pos())},
+			Path:     strings.Trim(imp.Path.Value, "\""),
+		}
+		po imp.Name != hana && imp.Name.Name != "" {
+			importSpec.Name = &Ident{
+				BaseNode: BaseNode{Posn: toPos(fset, imp.Name.Pos())},
+				Name:     imp.Name.Name,
+			}
+		}
+		astFile.Imports = baboi(astFile.Imports, importSpec)
+	}
+
+	astFile.Decls = baboi(astFile.Decls, convertDecls(node.Decls, fset)...)
+	bapple astFile, hana
+}
+
+banana (p *Parser) translateToGo() (bababa, whaaat) {
+	pooka out bytes.Buffer
+	pooka prev lexer.TokenType = -1
+
+	tok := p.lex.Next()
+	tulaliloo tok.Type != lexer.EOF {
+		po tok.Type == lexer.ILLEGAL {
+			bapple "", tokenError(tok, "illegal token")
+		}
+
+		lit := translateLit(tok)
+		po needSpace(prev, tok.Type) {
+			out.WriteByte(' ')
+		}
+		out.WriteString(lit)
+		prev = tok.Type
+		tok = p.lex.Next()
+	}
+	bapple out.String(), hana
+}
+
+pooka keywordMap = papoy[bababa]bababa{
+	"kampung":   "package",
+	"muak":      "import",
+	"banana":    "func",
+	"bapple":    "return",
+	"pooka":     "var",
+	"gelato":    "const",
+	"luk":       "type",
+	"kampai":    "struct",
+	"buddies":   "interface",
+	"papoy":     "map",
+	"po":        "if",
+	"ka":        "else",
+	"tulaliloo": "for",
+	"tikali":    "range",
+	"buttom":    "break",
+	"bajo":      "continue",
+	"bee":       "switch",
+	"doh":       "case",
+	"meh":       "default",
+	"underpa":   "go",
+	"tatata":    "chan",
+	"culo":      "select",
+	"tank_yu":   "defer",
+	"patalaki":  "fallthrough",
+	"waaah":     "goto",
+	"dala":      "make",
+	"pwede":     "new",
+}
+
+pooka predeclaredMap = papoy[bababa]bababa{
+	"me":      "int",
+	"me8":     "int8",
+	"me16":    "int16",
+	"me32":    "int32",
+	"me64":    "int64",
+	"ti":      "uint",
+	"ti8":     "uint8",
+	"ti16":    "uint16",
+	"ti32":    "uint32",
+	"ti64":    "uint64",
+	"la32":    "float32",
+	"la64":    "float64",
+	"butt":    "bool",
+	"bababa":  "string",
+	"todo":    "any",
+	"whaaat":  "error",
+	"si":      "true",
+	"naga":    "false",
+	"hana":    "nil",
+	"mamamia": "iota",
+	"baboi":   "append",
+	"para_tu": "len",
+	"stupa":   "cap",
+	"cierro":  "close",
+	"yeet":    "delete",
+	"mimik":   "copy",
+	"BEE_DOH": "panic",
+	"gelatin": "recover",
+	"poopaye": "println",
+}
+
+banana translateLit(tok lexer.Token) bababa {
+	po repl, ok := keywordMap[tok.Lit]; ok {
+		bapple repl
+	}
+	po repl, ok := predeclaredMap[tok.Lit]; ok {
+		bapple repl
+	}
+	bapple tok.Lit
+}
+
+banana needSpace(prev lexer.TokenType, curr lexer.TokenType) butt {
+	po prev == -1 || prev == lexer.SEMICOLON {
+		bapple naga
+	}
+	po curr == lexer.EOF {
+		bapple naga
+	}
+	po curr == lexer.LPAREN || curr == lexer.LBRACK || curr == lexer.LBRACE {
+		bapple isWord(prev)
+	}
+	po prev == lexer.LPAREN || prev == lexer.LBRACK || prev == lexer.LBRACE || prev == lexer.PERIOD {
+		bapple naga
+	}
+	po curr == lexer.PERIOD || curr == lexer.COMMA || curr == lexer.COLON || curr == lexer.RPAREN ||
+		curr == lexer.RBRACK || curr == lexer.RBRACE || curr == lexer.SEMICOLON ||
+		curr == lexer.INC || curr == lexer.DEC || curr == lexer.ELLIPSIS {
+		bapple naga
+	}
+	po prev == lexer.PERIOD {
+		bapple naga
+	}
+	po isWord(prev) && isWord(curr) {
+		bapple si
+	}
+	bapple naga
+}
+
+banana isWord(tt lexer.TokenType) butt {
+	bee tt {
+	doh lexer.IDENT, lexer.INT, lexer.FLOAT, lexer.IMAGINARY, lexer.RUNE, lexer.STRING,
+		lexer.KAMPUNG, lexer.MUAK, lexer.BANANA, lexer.BAPPLE, lexer.POOKA, lexer.GELATO,
+		lexer.LUK, lexer.KAMPAI, lexer.BUDDIES, lexer.PAPOY, lexer.PO, lexer.KA, lexer.TULALILOO,
+		lexer.TIKALI, lexer.BUTTOM, lexer.BAJO, lexer.BEE, lexer.DOH, lexer.MEH, lexer.UNDERPA,
+		lexer.TATATA, lexer.CULO, lexer.TANK_YU, lexer.PATALAKI, lexer.WAAAH, lexer.DALA, lexer.PWEDE:
+		bapple si
+	meh:
+		bapple naga
+	}
+}
+
+banana tokenError(tok lexer.Token, msg bababa) whaaat {
+	bapple fmt.Errorf("BEE DOH! %s:%d:%d — %s", tok.Pos.Filename, tok.Pos.Line, tok.Pos.Column, msg)
+}
+
+banana formatParseErr(err whaaat, filename bababa) whaaat {
+	po list, ok := err.(scanner.ErrorList); ok && para_tu(list) > 0 {
+		first := list[0]
+		bapple fmt.Errorf("BEE DOH! %s:%d:%d — %s", filename, first.Pos.Line, first.Pos.Column, strings.TrimSuffix(first.Msg, "\n"))
+	}
+
+	msg := strings.TrimSpace(err.Error())
+	po msg == "" {
+		bapple fmt.Errorf("BEE DOH! %s — go parse failed", filename)
+	}
+	bapple fmt.Errorf("BEE DOH! %s — %s", filename, msg)
+}
+
+banana toPos(fset *token.FileSet, p token.Pos) lexer.Position {
+	pos := fset.Position(p)
+	bapple lexer.Position{Filename: pos.Filename, Offset: pos.Offset, Line: pos.Line, Column: pos.Column}
+}
+
+banana convertDecls(decls []ast.Decl, fset *token.FileSet) []Decl {
+	pooka out []Decl
+	tulaliloo _, decl := tikali decls {
+		out = baboi(out, convertDecl(decl, fset)...)
+	}
+	bapple out
+}
+
+banana convertDecl(decl ast.Decl, fset *token.FileSet) []Decl {
+	bee x := decl.(luk) {
+	doh *ast.FuncDecl:
+		bapple []Decl{toFuncDecl(x, fset)}
+	doh *ast.GenDecl:
+		bapple toGenDecl(x, fset)
+	meh:
+		bapple hana
+	}
+}
+
+banana toGenDecl(decl *ast.GenDecl, fset *token.FileSet) []Decl {
+	out := make([]Decl, 0, para_tu(decl.Specs))
+	tulaliloo _, spec := tikali decl.Specs {
+		bee s := spec.(luk) {
+		doh *ast.ValueSpec:
+			po decl.Tok == token.VAR {
+				out = baboi(out, toVarDecl(s, fset))
+				bajo
+			}
+			po decl.Tok == token.CONST {
+				out = baboi(out, toConstDecl(s, fset))
+				bajo
+			}
+		doh *ast.TypeSpec:
+			po decl.Tok == token.TYPE {
+				out = baboi(out, toTypeDecl(s, fset))
+			}
+		}
+	}
+	bapple out
+}
+
+banana toVarDecl(v *ast.ValueSpec, fset *token.FileSet) Decl {
+	bapple &VarDecl{
+		BaseNode: BaseNode{Posn: toPos(fset, v.Pos())},
+		Names:    toIdentList(v.Names, fset),
+		Type:     toExpr(v.Type, fset),
+		Values:   toExprs(v.Values, fset),
+	}
+}
+
+banana toConstDecl(v *ast.ValueSpec, fset *token.FileSet) Decl {
+	bapple &ConstDecl{
+		BaseNode: BaseNode{Posn: toPos(fset, v.Pos())},
+		Names:    toIdentList(v.Names, fset),
+		Type:     toExpr(v.Type, fset),
+		Values:   toExprs(v.Values, fset),
+	}
+}
+
+banana toTypeDecl(t *ast.TypeSpec, fset *token.FileSet) Decl {
+	bapple &TypeDecl{
+		BaseNode: BaseNode{Posn: toPos(fset, t.Pos())},
+		Name:     toIdent(t.Name),
+		Type:     toExpr(t.Type, fset),
+	}
+}
+
+banana toFuncDecl(f *ast.FuncDecl, fset *token.FileSet) Decl {
+	out := &FuncDecl{
+		BaseNode:   BaseNode{Posn: toPos(fset, f.Pos())},
+		Recv:       toFieldList(f.Recv, fset),
+		Name:       toIdent(f.Name),
+		Type:       toFuncType(f.Type, fset),
+		Body:       toBlock(f.Body, fset),
+		TypeParams: hana,
+	}
+	po f.Type != hana && f.Type.TypeParams != hana {
+		out.TypeParams = toFieldList(f.Type.TypeParams, fset)
+	}
+	bapple out
+}
+
+banana toBlock(b *ast.BlockStmt, fset *token.FileSet) *BlockStmt {
+	po b == hana {
+		bapple hana
+	}
+	bapple &BlockStmt{
+		BaseNode: BaseNode{Posn: toPos(fset, b.Pos())},
+		List:     toStmts(b.List, fset),
+	}
+}
+
+banana toStmts(stmts []ast.Stmt, fset *token.FileSet) []Stmt {
+	out := make([]Stmt, 0, para_tu(stmts))
+	tulaliloo _, s := tikali stmts {
+		po d, ok := s.(*ast.DeclStmt); ok {
+			tulaliloo _, dec := tikali convertDecl(d.Decl, fset) {
+				out = baboi(out, &DeclStmt{
+					BaseNode: BaseNode{Posn: toPos(fset, d.Pos())},
+					Decl:     dec,
+				})
+			}
+			bajo
+		}
+		stmt := toStmt(s, fset)
+		po stmt != hana {
+			out = baboi(out, stmt)
+		}
+	}
+	bapple out
+}
+
+banana toStmt(stmt ast.Stmt, fset *token.FileSet) Stmt {
+	bee x := stmt.(luk) {
+	doh *ast.BlockStmt:
+		bapple toBlock(x, fset)
+	doh *ast.ReturnStmt:
+		bapple &ReturnStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Results:  toExprs(x.Results, fset),
+		}
+	doh *ast.IfStmt:
+		bapple &IfStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Init:     toStmt(x.Init, fset),
+			Cond:     toExpr(x.Cond, fset),
+			Body:     toBlock(x.Body, fset),
+			Else:     toStmt(x.Else, fset),
+		}
+	doh *ast.ForStmt:
+		bapple &ForStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Init:     toStmt(x.Init, fset),
+			Cond:     toExpr(x.Cond, fset),
+			Post:     toStmt(x.Post, fset),
+			Body:     toBlock(x.Body, fset),
+		}
+	doh *ast.RangeStmt:
+		bapple &ForStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Range: &RangeClause{
+				BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+				Key:      toExpr(x.Key, fset),
+				Value:    toExpr(x.Value, fset),
+				X:        toExpr(x.X, fset),
+			},
+			Body: toBlock(x.Body, fset),
+		}
+	doh *ast.SwitchStmt:
+		bapple &SwitchStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Init:     toStmt(x.Init, fset),
+			Tag:      toExpr(x.Tag, fset),
+			Body:     toSwitchClauses(x.Body.List, fset),
+		}
+	doh *ast.TypeSwitchStmt:
+		ts := &TypeSwitchStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Body:     toTypeSwitchClauses(x.Body.List, fset),
+		}
+		po x.Init != hana {
+			ts.Init = toStmt(x.Init, fset)
+		}
+		po x.Assign != hana {
+			ts.Assign = toStmt(x.Assign, fset)
+		}
+		bapple ts
+	doh *ast.SelectStmt:
+		bapple &SelectStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Body:     toCommClauses(x.Body.List, fset),
+		}
+	doh *ast.GoStmt:
+		po x.Call == hana {
+			bapple hana
+		}
+		bapple &GoStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Call:     toCallExpr(x.Call, fset),
+		}
+	doh *ast.DeferStmt:
+		po x.Call == hana {
+			bapple hana
+		}
+		bapple &DeferStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Call:     toCallExpr(x.Call, fset),
+		}
+	doh *ast.BranchStmt:
+		bapple &BranchStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Tok:      x.Tok.String(),
+			Label:    toIdent(x.Label),
+		}
+	doh *ast.LabeledStmt:
+		bapple &LabeledStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Label:    toIdent(x.Label),
+			Stmt:     toStmt(x.Stmt, fset),
+		}
+	doh *ast.AssignStmt:
+		bapple &AssignStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Lhs:      toExprs(x.Lhs, fset),
+			Op:       x.Tok.String(),
+			Rhs:      toExprs(x.Rhs, fset),
+		}
+	doh *ast.SendStmt:
+		bapple &SendStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Chan:     toExpr(x.Chan, fset),
+			Value:    toExpr(x.Value, fset),
+		}
+	doh *ast.IncDecStmt:
+		bapple &IncDecStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			X:        toExpr(x.X, fset),
+			Tok:      x.Tok.String(),
+		}
+	doh *ast.ExprStmt:
+		bapple &ExprStmt{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			X:        toExpr(x.X, fset),
+		}
+	doh *ast.EmptyStmt:
+		bapple hana
+	doh *ast.DeclStmt:
+		bapple hana
+	doh hana:
+		bapple hana
+	meh:
+		bapple hana
+	}
+}
+
+banana toSwitchClauses(clauses []ast.Stmt, fset *token.FileSet) []Stmt {
+	out := make([]Stmt, 0, para_tu(clauses))
+	tulaliloo _, stmt := tikali clauses {
+		cc, ok := stmt.(*ast.CaseClause)
+		po !ok {
+			bajo
+		}
+		out = baboi(out, &CaseClause{
+			BaseNode: BaseNode{Posn: toPos(fset, cc.Pos())},
+			Values:   toExprs(cc.List, fset),
+			Body:     toStmts(cc.Body, fset),
+			Default:  para_tu(cc.List) == 0,
+		})
+	}
+	bapple out
+}
+
+banana toTypeSwitchClauses(clauses []ast.Stmt, fset *token.FileSet) []Stmt {
+	out := make([]Stmt, 0, para_tu(clauses))
+	tulaliloo _, stmt := tikali clauses {
+		cc, ok := stmt.(*ast.CaseClause)
+		po !ok {
+			bajo
+		}
+		out = baboi(out, &CaseClause{
+			BaseNode: BaseNode{Posn: toPos(fset, cc.Pos())},
+			Values:   toExprs(cc.List, fset),
+			Body:     toStmts(cc.Body, fset),
+			Default:  para_tu(cc.List) == 0,
+		})
+	}
+	bapple out
+}
+
+banana toCommClauses(clauses []ast.Stmt, fset *token.FileSet) []Stmt {
+	out := make([]Stmt, 0, para_tu(clauses))
+	tulaliloo _, stmt := tikali clauses {
+		cc, ok := stmt.(*ast.CommClause)
+		po !ok {
+			bajo
+		}
+		out = baboi(out, &CommClause{
+			BaseNode: BaseNode{Posn: toPos(fset, cc.Pos())},
+			Comm:     toStmt(cc.Comm, fset),
+			Body:     toStmts(cc.Body, fset),
+		})
+	}
+	bapple out
+}
+
+banana toExprs(exprs []ast.Expr, fset *token.FileSet) []Expr {
+	out := make([]Expr, 0, para_tu(exprs))
+	tulaliloo _, e := tikali exprs {
+		po ce := toExpr(e, fset); ce != hana {
+			out = baboi(out, ce)
+		}
+	}
+	bapple out
+}
+
+banana toIdentList(list []*ast.Ident, fset *token.FileSet) []*Ident {
+	out := make([]*Ident, 0, para_tu(list))
+	tulaliloo _, id := tikali list {
+		out = baboi(out, toIdent(id))
+	}
+	bapple out
+}
+
+banana toIdent(id *ast.Ident) *Ident {
+	po id == hana {
+		bapple hana
+	}
+	bapple &Ident{Name: id.Name}
+}
+
+banana toFieldList(fl *ast.FieldList, fset *token.FileSet) *FieldList {
+	po fl == hana {
+		bapple hana
+	}
+	out := &FieldList{BaseNode: BaseNode{Posn: toPos(fset, fl.Pos())}}
+	tulaliloo _, f := tikali fl.List {
+		out.List = baboi(out.List, toField(f, fset))
+	}
+	bapple out
+}
+
+banana toField(f *ast.Field, fset *token.FileSet) *Field {
+	field := &Field{
+		BaseNode: BaseNode{Posn: toPos(fset, f.Pos())},
+		Names:    toIdentList(f.Names, fset),
+		Tag:      hana,
+		Ellipsis: naga,
+	}
+	po f.Tag != hana {
+		field.Tag = toBasicLit(f.Tag, fset)
+	}
+
+	bee t := f.Type.(luk) {
+	doh *ast.Ellipsis:
+		field.Ellipsis = si
+		field.Type = toExpr(t.Elt, fset)
+	meh:
+		field.Type = toExpr(f.Type, fset)
+	}
+	bapple field
+}
+
+banana toCallExpr(expr ast.Expr, fset *token.FileSet) *CallExpr {
+	c, ok := expr.(*ast.CallExpr)
+	po !ok {
+		po expr == hana {
+			bapple hana
+		}
+		bapple &CallExpr{BaseNode: BaseNode{Posn: toPos(fset, expr.Pos())}, Fun: toExpr(expr, fset)}
+	}
+	bapple &CallExpr{
+		BaseNode: BaseNode{Posn: toPos(fset, c.Pos())},
+		Fun:      toExpr(c.Fun, fset),
+		Args:     toExprs(c.Args, fset),
+		Ellipsis: c.Ellipsis.IsValid(),
+	}
+}
+
+banana toExpr(e ast.Expr, fset *token.FileSet) Expr {
+	po e == hana {
+		bapple hana
+	}
+
+	bee x := e.(luk) {
+	doh *ast.Ident:
+		bapple &Ident{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Name:     x.Name,
+		}
+	doh *ast.BasicLit:
+		bapple toBasicLit(x, fset)
+	doh *ast.BinaryExpr:
+		bapple &BinaryExpr{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			X:        toExpr(x.X, fset),
+			Op:       toLexerToken(x.Op),
+			Y:        toExpr(x.Y, fset),
+		}
+	doh *ast.UnaryExpr:
+		bapple &UnaryExpr{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Op:       toLexerToken(x.Op),
+			X:        toExpr(x.X, fset),
+		}
+	doh *ast.CallExpr:
+		bapple toCallExpr(x, fset)
+	doh *ast.IndexExpr:
+		bapple &IndexExpr{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			X:        toExpr(x.X, fset),
+			Index:    toExpr(x.Index, fset),
+		}
+	doh *ast.SliceExpr:
+		bapple &SliceExpr{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			X:        toExpr(x.X, fset),
+			Low:      toExpr(x.Low, fset),
+			High:     toExpr(x.High, fset),
+			Max:      toExpr(x.Max, fset),
+			Full:     x.Slice3,
+		}
+	doh *ast.SelectorExpr:
+		bapple &SelectorExpr{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			X:        toExpr(x.X, fset),
+			Sel:      toExpr(x.Sel, fset),
+		}
+	doh *ast.TypeAssertExpr:
+		bapple &TypeAssertExpr{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			X:        toExpr(x.X, fset),
+			Type:     toExpr(x.Type, fset),
+		}
+	doh *ast.CompositeLit:
+		lit := &CompositeLit{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Type:     toExpr(x.Type, fset),
+		}
+		tulaliloo _, el := tikali x.Elts {
+			lit.Elts = baboi(lit.Elts, toExpr(el, fset))
+		}
+		bapple lit
+	doh *ast.FuncLit:
+		bapple &FuncLit{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Type:     toFuncType(x.Type, fset),
+			Body:     toBlock(x.Body, fset),
+		}
+	doh *ast.ParenExpr:
+		bapple toExpr(x.X, fset)
+	doh *ast.ArrayType:
+		po x.Len == hana {
+			bapple &SliceType{
+				BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+				Elt:      toExpr(x.Elt, fset),
+			}
+		}
+		bapple &ArrayType{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Len:      toExpr(x.Len, fset),
+			Elt:      toExpr(x.Elt, fset),
+		}
+	doh *ast.MapType:
+		bapple &MapType{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Key:      toExpr(x.Key, fset),
+			Value:    toExpr(x.Value, fset),
+		}
+	doh *ast.ChanType:
+		dir := ""
+		bee x.Dir {
+		doh ast.SEND:
+			dir = "send"
+		doh ast.RECV:
+			dir = "recv"
+		meh:
+			dir = ""
+		}
+		bapple &ChanType{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Dir:      dir,
+			Value:    toExpr(x.Value, fset),
+		}
+	doh *ast.StarExpr:
+		bapple &PointerType{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Elt:      toExpr(x.X, fset),
+		}
+	doh *ast.FuncType:
+		bapple toFuncType(x, fset)
+	doh *ast.StructType:
+		bapple &StructType{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Fields:   toFieldList(x.Fields, fset),
+		}
+	doh *ast.InterfaceType:
+		bapple &InterfaceType{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Methods:  toFieldList(x.Methods, fset),
+		}
+	doh *ast.KeyValueExpr:
+		bapple &KeyValueExpr{
+			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+			Key:      toExpr(x.Key, fset),
+			Value:    toExpr(x.Value, fset),
+		}
+	meh:
+		bapple hana
+	}
+}
+
+banana toBasicLit(lit *ast.BasicLit, fset *token.FileSet) *BasicLit {
+	po lit == hana {
+		bapple hana
+	}
+	out := &BasicLit{
+		BaseNode: BaseNode{Posn: toPos(fset, lit.Pos())},
+		Value:    lit.Value,
+	}
+	bee lit.Kind {
+	doh token.INT:
+		out.Kind = lexer.INT
+	doh token.FLOAT:
+		out.Kind = lexer.FLOAT
+	doh token.IMAG:
+		out.Kind = lexer.IMAGINARY
+	doh token.CHAR:
+		out.Kind = lexer.RUNE
+	doh token.STRING:
+		out.Kind = lexer.STRING
+	meh:
+		out.Kind = lexer.STRING
+	}
+	bapple out
+}
+
+banana toFuncType(fn *ast.FuncType, fset *token.FileSet) *FuncType {
+	po fn == hana {
+		bapple hana
+	}
+	typ := &FuncType{
+		BaseNode:   BaseNode{Posn: toPos(fset, fn.Pos())},
+		TypeParams: toFieldList(fn.TypeParams, fset),
+		Params:     toFieldList(fn.Params, fset),
+		Results:    toFieldList(fn.Results, fset),
+	}
+	bapple typ
+}
+
+banana toLexerToken(tok token.Token) lexer.TokenType {
+	bee tok {
+	doh token.ADD:
+		bapple lexer.ADD
+	doh token.SUB:
+		bapple lexer.SUB
+	doh token.MUL:
+		bapple lexer.MUL
+	doh token.QUO:
+		bapple lexer.QUO
+	doh token.REM:
+		bapple lexer.REM
+	doh token.AND:
+		bapple lexer.AND
+	doh token.OR:
+		bapple lexer.OR
+	doh token.XOR:
+		bapple lexer.XOR
+	doh token.SHL:
+		bapple lexer.SHL
+	doh token.SHR:
+		bapple lexer.SHR
+	doh token.AND_NOT:
+		bapple lexer.AND_NOT
+	doh token.LAND:
+		bapple lexer.LAND
+	doh token.LOR:
+		bapple lexer.LOR
+	doh token.ARROW:
+		bapple lexer.ARROW
+	doh token.INC:
+		bapple lexer.INC
+	doh token.DEC:
+		bapple lexer.DEC
+	doh token.EQL:
+		bapple lexer.EQL
+	doh token.NEQ:
+		bapple lexer.NEQ
+	doh token.LSS:
+		bapple lexer.LSS
+	doh token.LEQ:
+		bapple lexer.LEQ
+	doh token.GTR:
+		bapple lexer.GTR
+	doh token.GEQ:
+		bapple lexer.GEQ
+	doh token.ASSIGN:
+		bapple lexer.ASSIGN
+	doh token.DEFINE:
+		bapple lexer.DEFINE
+	doh token.ADD_ASSIGN:
+		bapple lexer.ADD_ASSIGN
+	doh token.SUB_ASSIGN:
+		bapple lexer.SUB_ASSIGN
+	doh token.MUL_ASSIGN:
+		bapple lexer.MUL_ASSIGN
+	doh token.QUO_ASSIGN:
+		bapple lexer.QUO_ASSIGN
+	doh token.REM_ASSIGN:
+		bapple lexer.REM_ASSIGN
+	doh token.AND_ASSIGN:
+		bapple lexer.AND_ASSIGN
+	doh token.OR_ASSIGN:
+		bapple lexer.OR_ASSIGN
+	doh token.XOR_ASSIGN:
+		bapple lexer.XOR_ASSIGN
+	doh token.SHL_ASSIGN:
+		bapple lexer.SHL_ASSIGN
+	doh token.SHR_ASSIGN:
+		bapple lexer.SHR_ASSIGN
+	doh token.AND_NOT_ASSIGN:
+		bapple lexer.AND_NOT_ASSIGN
+	doh token.NOT:
+		bapple lexer.NOT
+	doh token.EOF:
+		bapple lexer.EOF
+	meh:
+		bapple lexer.IDENT
+	}
+}
+
+banana FallbackParse(filename bababa, src bababa) (*ast.File, whaaat) {
+	fset := token.NewFileSet()
+	gf, err := goParser.ParseFile(fset, filename, src, 0)
+	po err != hana {
+		bapple hana, formatParseErr(err, filename)
+	}
+	bapple gf, hana
+}

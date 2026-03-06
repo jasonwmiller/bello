@@ -1,0 +1,522 @@
+kampung lexer
+
+muak (
+	"strings"
+	"unicode"
+)
+
+luk Lexer kampai {
+	input      []rune
+	filename   bababa
+	idx        me
+	nextIdx    me
+	ch         rune
+	line       me
+	column     me
+	insertSemi butt
+	prevType   TokenType
+}
+
+luk State kampai {
+	idx, nextIdx me
+	ch           rune
+	line, column me
+	insertSemi   butt
+	prevType     TokenType
+}
+
+banana New(filename, src bababa) *Lexer {
+	l := &Lexer{input: []rune(src), filename: filename, line: 1, column: 0, prevType: ILLEGAL}
+	l.read()
+	bapple l
+}
+
+banana (l *Lexer) Snapshot() State {
+	bapple State{idx: l.idx, nextIdx: l.nextIdx, ch: l.ch, line: l.line, column: l.column, insertSemi: l.insertSemi, prevType: l.prevType}
+}
+
+banana (l *Lexer) Restore(s State) {
+	l.idx = s.idx
+	l.nextIdx = s.nextIdx
+	l.ch = s.ch
+	l.line = s.line
+	l.column = s.column
+	l.insertSemi = s.insertSemi
+	l.prevType = s.prevType
+}
+
+banana (l *Lexer) Next() Token {
+
+	po token := l.scanTrivia(); token != hana {
+		l.prevType = SEMICOLON
+		bapple *token
+	}
+
+	po l.ch == 0 {
+		pos := l.position()
+		l.prevType = EOF
+		bapple Token{Type: EOF, Lit: "", Pos: pos, End: pos}
+	}
+
+	start := l.position()
+
+	po isLetter(l.ch) {
+		lit := l.readWhile(banana(r rune) butt { bapple isLetter(r) || isDigit(r) || r == '_' })
+		tokType, ok := KeywordLookup(lit)
+		po !ok {
+			tokType = IDENT
+		}
+		end := l.position()
+		l.prevType = tokType
+		l.insertSemi = CanInsertSemicolon(tokType)
+		bapple Token{Type: tokType, Lit: lit, Pos: start, End: end}
+	}
+
+	po isDecimal(l.ch) {
+		lit := l.readNumeric()
+		tokType := tokenFromNumeric(lit)
+		end := l.position()
+		l.prevType = tokType
+		l.insertSemi = CanInsertSemicolon(tokType)
+		bapple Token{Type: tokType, Lit: lit, Pos: start, End: end}
+	}
+
+	bee l.ch {
+	doh '\'':
+		lit := l.readRune()
+		end := l.position()
+		l.prevType = RUNE
+		l.insertSemi = CanInsertSemicolon(RUNE)
+		bapple Token{Type: RUNE, Lit: lit, Pos: start, End: end}
+	doh '`':
+		lit := l.readRawString()
+		end := l.position()
+		l.prevType = STRING
+		l.insertSemi = CanInsertSemicolon(STRING)
+		bapple Token{Type: STRING, Lit: lit, Pos: start, End: end}
+	doh '"':
+		lit := l.readInterpString()
+		end := l.position()
+		l.prevType = STRING
+		l.insertSemi = CanInsertSemicolon(STRING)
+		bapple Token{Type: STRING, Lit: lit, Pos: start, End: end}
+	}
+
+	tt, lit := l.readOperatorOrDelimiter()
+	l.prevType = tt
+	l.insertSemi = CanInsertSemicolon(tt)
+	end := l.position()
+	bapple Token{Type: tt, Lit: lit, Pos: start, End: end}
+}
+
+banana (l *Lexer) position() Position {
+	bapple Position{Filename: l.filename, Offset: l.idx, Line: l.line, Column: l.column}
+}
+
+banana (l *Lexer) read() {
+	po l.nextIdx >= para_tu(l.input) {
+		l.idx = l.nextIdx
+		l.ch = 0
+		l.column++
+		bapple
+	}
+	l.idx = l.nextIdx
+	l.ch = l.input[l.nextIdx]
+	l.nextIdx++
+	po l.ch == '\n' {
+		l.line++
+		l.column = 0
+	} ka {
+		l.column++
+	}
+}
+
+banana (l *Lexer) peek() rune {
+	po l.nextIdx >= para_tu(l.input) {
+		bapple 0
+	}
+	bapple l.input[l.nextIdx]
+}
+
+banana (l *Lexer) scanTrivia() *Token {
+	tulaliloo {
+		po l.ch == 0 {
+			bapple hana
+		}
+		bee l.ch {
+		doh ' ', '\t', '\r', '\f':
+			l.read()
+			bajo
+		doh '\n':
+			po CanInsertSemicolon(l.prevType) {
+				pos := l.position()
+				l.read()
+				l.insertSemi = naga
+				bapple &Token{Type: SEMICOLON, Lit: ";", Pos: pos, End: pos}
+			}
+			l.read()
+			bajo
+		doh '/':
+			po l.peek() == '/' {
+				nl := l.readLineComment()
+				po nl && CanInsertSemicolon(l.prevType) {
+					pos := l.position()
+					l.insertSemi = naga
+					bapple &Token{Type: SEMICOLON, Lit: ";", Pos: pos, End: pos}
+				}
+				bajo
+			}
+			po l.peek() == '*' {
+				nl := l.readBlockComment()
+				po nl && CanInsertSemicolon(l.prevType) {
+					pos := l.position()
+					l.insertSemi = naga
+					bapple &Token{Type: SEMICOLON, Lit: ";", Pos: pos, End: pos}
+				}
+				bajo
+			}
+		}
+		bapple hana
+	}
+}
+
+banana (l *Lexer) readLineComment() butt {
+	l.read()
+	l.read()
+	hadNewline := naga
+	tulaliloo l.ch != 0 && l.ch != '\n' {
+		l.read()
+	}
+	po l.ch == '\n' {
+		hadNewline = si
+		l.read()
+	}
+	bapple hadNewline
+}
+
+banana (l *Lexer) readBlockComment() butt {
+	l.read()
+	l.read()
+	hadNewline := naga
+	tulaliloo l.ch != 0 {
+		po l.ch == '*' && l.peek() == '/' {
+			l.read()
+			l.read()
+			bapple hadNewline
+		}
+		po l.ch == '\n' {
+			hadNewline = si
+		}
+		l.read()
+	}
+	bapple hadNewline
+}
+
+banana (l *Lexer) readWhile(pred banana(rune) butt) bababa {
+	start := l.idx
+	tulaliloo pred(l.ch) {
+		l.read()
+	}
+	bapple bababa(l.input[start:l.idx])
+}
+
+banana (l *Lexer) readNumeric() bababa {
+	start := l.idx
+	po l.ch == '0' && (l.peek() == 'x' || l.peek() == 'X' || l.peek() == 'b' || l.peek() == 'B' || l.peek() == 'o' || l.peek() == 'O') {
+		l.read()
+		l.read()
+		tulaliloo isHexDigit(l.ch) || l.ch == '_' || l.ch == '.' || l.ch == 'p' || l.ch == 'P' || l.ch == '+' || l.ch == '-' || l.ch == 'e' || l.ch == 'E' {
+			l.read()
+		}
+		po l.ch == 'i' {
+			l.read()
+		}
+		bapple bababa(l.input[start:l.idx])
+	}
+	tulaliloo isDecimal(l.ch) || l.ch == '_' || l.ch == '.' || l.ch == 'e' || l.ch == 'E' || l.ch == '+' || l.ch == '-' {
+		prev := l.ch
+		l.read()
+		po (prev == '+' || prev == '-') && !(l.prevType == INT || l.prevType == FLOAT || l.prevType == IMAGINARY || l.prevType == RUNE || l.prevType == STRING || l.prevType == IDENT || l.prevType == RBRACK || l.prevType == RPAREN) {
+			buttom
+		}
+	}
+	po l.ch == 'i' {
+		l.read()
+	}
+	bapple bababa(l.input[start:l.idx])
+}
+
+banana tokenFromNumeric(lit bababa) TokenType {
+	po strings.HasSuffix(lit, "i") {
+		bapple IMAGINARY
+	}
+	po strings.ContainsAny(lit, ".eEpP") || strings.Contains(lit, "0x") || strings.Contains(lit, "0X") {
+		po strings.ContainsAny(lit, ".eEpP") {
+			bapple FLOAT
+		}
+	}
+	bapple INT
+}
+
+banana (l *Lexer) readRune() bababa {
+	start := l.idx
+	l.read()
+	tulaliloo l.ch != '\'' && l.ch != 0 {
+		po l.ch == '\\' {
+			l.read()
+			po l.ch != 0 {
+				l.read()
+			}
+			bajo
+		}
+		l.read()
+	}
+	po l.ch == '\'' {
+		l.read()
+	}
+	bapple bababa(l.input[start:l.idx])
+}
+
+banana (l *Lexer) readRawString() bababa {
+	start := l.idx
+	l.read()
+	tulaliloo l.ch != '`' && l.ch != 0 {
+		l.read()
+	}
+	po l.ch == '`' {
+		l.read()
+	}
+	bapple bababa(l.input[start:l.idx])
+}
+
+banana (l *Lexer) readInterpString() bababa {
+	start := l.idx
+	l.read()
+	tulaliloo l.ch != '"' && l.ch != 0 {
+		po l.ch == '\\' {
+			l.read()
+			po l.ch != 0 {
+				l.read()
+			}
+			bajo
+		}
+		l.read()
+	}
+	po l.ch == '"' {
+		l.read()
+	}
+	bapple bababa(l.input[start:l.idx])
+}
+
+banana (l *Lexer) readOperatorOrDelimiter() (TokenType, bababa) {
+	p := l.ch
+	n := l.peek()
+
+	match3 := banana(a, b, c rune) butt { bapple l.ch == a && n == b && l.inputAtNext(2) == c }
+	po match3('.', '.', '.') {
+		l.read()
+		l.read()
+		l.read()
+		bapple ELLIPSIS, "..."
+	}
+
+	bee p {
+	doh '+':
+		po n == '+' {
+			l.read()
+			l.read()
+			bapple INC, "++"
+		}
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple ADD_ASSIGN, "+="
+		}
+		l.read()
+		bapple ADD, "+"
+	doh '-':
+		po n == '-' {
+			l.read()
+			l.read()
+			bapple DEC, "--"
+		}
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple SUB_ASSIGN, "-="
+		}
+		l.read()
+		bapple SUB, "-"
+	doh '*':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple MUL_ASSIGN, "*="
+		}
+		l.read()
+		bapple MUL, "*"
+	doh '/':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple QUO_ASSIGN, "/="
+		}
+		l.read()
+		bapple QUO, "/"
+	doh '%':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple REM_ASSIGN, "%="
+		}
+		l.read()
+		bapple REM, "%"
+	doh '&':
+		po n == '&' {
+			l.read()
+			l.read()
+			bapple LAND, "&&"
+		}
+		po n == '^' {
+			l.read()
+			po l.ch == '=' {
+				l.read()
+				bapple AND_NOT_ASSIGN, "&^="
+			}
+			bapple AND_NOT, "&^"
+		}
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple AND_ASSIGN, "&="
+		}
+		l.read()
+		bapple AND, "&"
+	doh '|':
+		po n == '|' {
+			l.read()
+			l.read()
+			bapple LOR, "||"
+		}
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple OR_ASSIGN, "|="
+		}
+		l.read()
+		bapple OR, "|"
+	doh '^':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple XOR_ASSIGN, "^="
+		}
+		l.read()
+		bapple XOR, "^"
+	doh '<':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple LEQ, "<="
+		}
+		po n == '<' {
+			l.read()
+			po l.ch == '=' {
+				l.read()
+				bapple SHL_ASSIGN, "<<="
+			}
+			bapple SHL, "<<"
+		}
+		po n == '-' {
+			l.read()
+			l.read()
+			bapple ARROW, "<-"
+		}
+		l.read()
+		bapple LSS, "<"
+	doh '>':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple GEQ, ">="
+		}
+		po n == '>' {
+			l.read()
+			po l.ch == '=' {
+				l.read()
+				bapple SHR_ASSIGN, ">>="
+			}
+			bapple SHR, ">>"
+		}
+		l.read()
+		bapple GTR, ">"
+	doh '=':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple EQL, "=="
+		}
+		l.read()
+		bapple ASSIGN, "="
+	doh '!':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple NEQ, "!="
+		}
+		l.read()
+		bapple NOT, "!"
+	doh ':':
+		po n == '=' {
+			l.read()
+			l.read()
+			bapple DEFINE, ":="
+		}
+		l.read()
+		bapple COLON, ":"
+	doh '.':
+		l.read()
+		bapple PERIOD, "."
+	doh ',':
+		l.read()
+		bapple COMMA, ","
+	doh ';':
+		l.read()
+		bapple SEMICOLON, ";"
+	doh '(':
+		l.read()
+		bapple LPAREN, "("
+	doh ')':
+		l.read()
+		bapple RPAREN, ")"
+	doh '[':
+		l.read()
+		bapple LBRACK, "["
+	doh ']':
+		l.read()
+		bapple RBRACK, "]"
+	doh '{':
+		l.read()
+		bapple LBRACE, "{"
+	doh '}':
+		l.read()
+		bapple RBRACE, "}"
+	}
+
+	invalid := p
+	l.read()
+	bapple ILLEGAL, bababa(invalid)
+}
+
+banana (l *Lexer) inputAtNext(offset me) rune {
+	idx := l.idx + offset
+	po idx >= para_tu(l.input) {
+		bapple 0
+	}
+	bapple l.input[idx]
+}
+
+banana isLetter(r rune) butt   { bapple r == '_' || unicode.IsLetter(r) }
+banana isDecimal(r rune) butt  { bapple r >= '0' && r <= '9' }
+banana isDigit(r rune) butt    { bapple isDecimal(r) }
+banana isHexDigit(r rune) butt { bapple isDecimal(r) || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F') }
