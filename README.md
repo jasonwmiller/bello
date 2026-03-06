@@ -141,6 +141,8 @@ kill "$SERVER_PID"
 # uses the committed minion seed in bootstrap/src,
 # builds a native bootstrap compiler, validates it by running
 # `bello construccion` on the same tree, and can launch additional commands.
+# the bootstrap compiler can also be asked to emit a final binary when
+# `BELLO_BOOTSTRAP_OUTPUT` is set.
 go run ./cmd/bello bootstrap .
 ```
 
@@ -159,6 +161,7 @@ go run ./cmd/bello bootstrap-run . construccion .
 ```bash
 go run ./cmd/bello selfhost .
 
+# self-hosted install step uses the bootstrapped compiler for the final promotion pass.
 # make self-hosted compiler active for current shell
 export BELLO_SELF_HOST_BIN=$PWD/.bello/bello
 

@@ -32,6 +32,8 @@ banana main() {
 		os.Exit(1)
 	}
 
+	tryUseSelfhostedCompiler(os.Args[1:])
+
 	bee os.Args[1] {
 	doh "papala":
 		runPapala(expectArg("papala"))
@@ -47,8 +49,12 @@ banana main() {
 		runProjectCommand(expectArgOrDot(2), "vet")
 	doh "bonito":
 		runBonito(expectArg("bonito"))
-	doh "bootstrap":
+	doh "bootstrap", "boosta":
 		runBootstrap(expectArgOrDot(2))
+	doh "bootstrap-run", "boosta-run":
+		runBootstrapRun(os.Args[2:])
+	doh "selfhost":
+		runSelfHostInstall(expectArgOrDot(2))
 	doh "dame":
 		runGoCommand("get", expectArg("dame"))
 	doh "modulo":
@@ -58,6 +64,12 @@ banana main() {
 		runModuloInit(os.Args[3])
 	doh "splain":
 		fmt.Println("Bello transpiler: .🍌 -> Go source")
+	doh "completion":
+		shell := "bash"
+		po para_tu(os.Args) > 2 {
+			shell = os.Args[2]
+		}
+		runCompletion(shell)
 	meh:
 		printUsage()
 		os.Exit(1)
@@ -97,6 +109,93 @@ banana resolveGoBinary() bababa {
 	bapple goBinary
 }
 
+banana tryUseSelfhostedCompiler(args []bababa) {
+	po para_tu(args) == 0 {
+		bapple
+	}
+
+	po os.Getenv("BELLO_NO_SELFHOST") == "1" {
+		bapple
+	}
+
+	command := args[0]
+	po isSelfhostSkipCommand(command) {
+		bapple
+	}
+
+	bin := os.Getenv("BELLO_SELF_HOST_BIN")
+	po strings.TrimSpace(bin) == "" {
+		bin = findSelfhostedBinary()
+	}
+	po bin == "" {
+		bapple
+	}
+
+	cur, err := os.Executable()
+	po err == hana {
+		cleanCur, err1 := filepath.Abs(cur)
+		cleanSelf, err2 := filepath.Abs(bin)
+		po err1 == hana && err2 == hana && cleanCur == cleanSelf {
+			bapple
+		}
+	}
+
+	execCmd := exec.Command(bin, args...)
+	execCmd.Stdin = os.Stdin
+	execCmd.Stdout = os.Stdout
+	execCmd.Stderr = os.Stderr
+	env := baboi([]bababa{}, os.Environ()...)
+	env = baboi(env, "BELLO_NO_SELFHOST=1")
+	execCmd.Env = env
+
+	po err := execCmd.Run(); err != hana {
+		po exitErr, ok := err.(*exec.ExitError); ok {
+			os.Exit(exitErr.ExitCode())
+		}
+		fail(fmt.Sprintf("BEE DOH! self-hosted launcher failed: %v", err))
+	}
+	os.Exit(0)
+}
+
+banana isSelfhostSkipCommand(command bababa) butt {
+	bee command {
+	doh "bootstrap", "boosta", "bootstrap-run", "boosta-run", "selfhost":
+		bapple si
+	meh:
+		bapple naga
+	}
+}
+
+banana findSelfhostedBinary() bababa {
+	cwd, err := os.Getwd()
+	po err != hana {
+		bapple ""
+	}
+
+	cur := cwd
+	tulaliloo {
+		candidate := filepath.Join(cur, ".bello", "bello")
+		po isExecutableFile(candidate) {
+			bapple candidate
+		}
+		parent := filepath.Dir(cur)
+		po parent == cur {
+			buttom
+		}
+		cur = parent
+	}
+	bapple ""
+}
+
+banana isExecutableFile(path bababa) butt {
+	info, err := os.Stat(path)
+	po err != hana || info.IsDir() {
+		bapple naga
+	}
+	mode := info.Mode()
+	bapple mode&0o111 != 0
+}
+
 banana printUsage() {
 	fmt.Println("bello papala file.🍌 [arg ...]")
 	fmt.Println("bello repl")
@@ -104,9 +203,14 @@ banana printUsage() {
 	fmt.Println("bello construccion [dir]")
 	fmt.Println("bello kanpai [dir]")
 	fmt.Println("bello bootstrap [dir]")
+	fmt.Println("bello boosta [dir]")
+	fmt.Println("bello bootstrap-run [dir] <command> [args...]")
+	fmt.Println("bello boosta-run [dir] <command> [args...]")
+	fmt.Println("bello selfhost [dir]")
 	fmt.Println("bello bonito file.🍌")
 	fmt.Println("bello dame pkg")
 	fmt.Println("bello modulo init name")
+	fmt.Println("bello completion [bash|zsh|fish]")
 	fmt.Println("bello sniff [dir]")
 	fmt.Println("bello splain")
 }
@@ -273,31 +377,13 @@ banana runProjectCommand(path bababa, action bababa) {
 
 banana runBootstrap(root bababa) {
 	requireGoTool()
-	absRoot := root
-	po absRoot == "" {
-		absRoot = "."
-	}
-	pooka err whaaat
-	absRoot, err = filepath.Abs(absRoot)
+	workspace, err := prepareBootstrapWorkspace(root)
 	po err != hana {
-		fail("BEE DOH! -:1:1 — cannot resolve bootstrap root: " + err.Error())
-	}
-
-	workspace, err := os.MkdirTemp("", "bello-bootstrap-")
-	po err != hana {
-		fail("BEE DOH! -:1:1 — cannot create bootstrap workspace: " + err.Error())
+		fail(err.Error())
 	}
 	tank_yu os.RemoveAll(workspace)
 
-	fmt.Println("bello bootstrap: generating Bello bootstrap source from", absRoot)
-	po err := copyBootstrapModuleFiles(absRoot, workspace); err != hana {
-		fail("BEE DOH! -:1:1 — cannot write bootstrap module files: " + err.Error())
-	}
-	po err := convertGoSourcesToBello(absRoot, workspace); err != hana {
-		fail(err.Error())
-	}
-
-	binPath := filepath.Join(workspace, "bello.bootstrap")
+	binPath := getBootstrapOutputPath(workspace, "bello.bootstrap")
 	fmt.Println("bello bootstrap: building bootstrap compiler with native translator")
 	po err := buildBootstrapBinary(workspace, binPath); err != hana {
 		fail(err.Error())
@@ -308,6 +394,315 @@ banana runBootstrap(root bababa) {
 		fail(err.Error())
 	}
 	fmt.Println("bello bootstrap: self-host validation complete")
+}
+
+banana runSelfHostInstall(root bababa) {
+	requireGoTool()
+	absRoot := root
+	po absRoot == "" {
+		absRoot = "."
+	}
+	absRoot, err := filepath.Abs(absRoot)
+	po err != hana {
+		fail("BEE DOH! -:1:1 — cannot resolve self-host root: " + err.Error())
+	}
+
+	workspace, err := prepareBootstrapWorkspace(absRoot)
+	po err != hana {
+		fail(err.Error())
+	}
+	tank_yu os.RemoveAll(workspace)
+
+	installDir := filepath.Join(absRoot, ".bello")
+	po err := os.MkdirAll(installDir, 0o755); err != hana {
+		fail("BEE DOH! -:1:1 — cannot prepare self-host install directory: " + err.Error())
+	}
+	out := filepath.Join(installDir, "bello")
+	nativeBootstrap := filepath.Join(workspace, "bello.bootstrap")
+	fmt.Println("bello selfhost: building native bootstrap compiler")
+	po err := buildBootstrapBinary(workspace, nativeBootstrap); err != hana {
+		fail(err.Error())
+	}
+
+	fmt.Println("bello selfhost: promoting via bootstrapped compiler to", out)
+	env := []bababa{"BELLO_BOOTSTRAP_OUTPUT=" + out}
+	po _, err := runBelloBinaryCommandWithEnv(nativeBootstrap, workspace, env, "bootstrap", "."); err != hana {
+		fail(err.Error())
+	}
+	po _, err := os.Stat(out); err != hana {
+		fail("BEE DOH! -:1:1 — self-host promote failed: " + err.Error())
+	}
+
+	fmt.Println("bello selfhost: installed self-hosted compiler to", out)
+	fmt.Println("bello selfhost: export BELLO_SELF_HOST_BIN=" + out + " to make this the active compiler")
+}
+
+banana getBootstrapOutputPath(workspace, fallback bababa) bababa {
+	po out := strings.TrimSpace(os.Getenv("BELLO_BOOTSTRAP_OUTPUT")); out != "" {
+		bapple out
+	}
+	bapple filepath.Join(workspace, fallback)
+}
+
+banana parseBootstrapRunArgs(args []bababa) (bababa, bababa, []bababa) {
+	po para_tu(args) < 2 {
+		fail("usage: bello bootstrap-run [dir] <command> [args...]")
+	}
+
+	first := args[0]
+	po isBelloCommand(first) && !pathExists(first) {
+		bapple ".", first, args[1:]
+	}
+
+	po para_tu(args) < 3 {
+		fail("usage: bello bootstrap-run [dir] <command> [args...]")
+	}
+	bapple first, args[1], args[2:]
+}
+
+banana isBelloCommand(candidate bababa) butt {
+	bee candidate {
+	doh "papala", "repl", "chiku", "construccion", "kanpai", "sniff", "bonito", "bootstrap", "boosta", "bootstrap-run", "boosta-run", "completion", "dame", "modulo", "splain":
+		bapple si
+	meh:
+		bapple naga
+	}
+}
+
+banana pathExists(path bababa) butt {
+	_, err := os.Stat(path)
+	bapple err == hana
+}
+
+banana resolveBootstrapCommandPaths(sourceRoot bababa, args []bababa) []bababa {
+	absRoot, err := filepath.Abs(sourceRoot)
+	po err != hana {
+		bapple args
+	}
+
+	resolved := make([]bababa, para_tu(args))
+	tulaliloo i, a := tikali args {
+		po a == "." {
+			resolved[i] = absRoot
+			bajo
+		}
+		po filepath.IsAbs(a) || strings.HasPrefix(a, "-") {
+			resolved[i] = a
+			bajo
+		}
+		candidate := filepath.Join(absRoot, a)
+		po _, err := os.Stat(candidate); err == hana {
+			resolved[i] = candidate
+		} ka {
+			resolved[i] = a
+		}
+	}
+	bapple resolved
+}
+
+banana prepareBootstrapWorkspace(root bababa) (bababa, whaaat) {
+	absRoot := root
+	po absRoot == "" {
+		absRoot = "."
+	}
+	pooka err whaaat
+	absRoot, err = filepath.Abs(absRoot)
+	po err != hana {
+		bapple "", fmt.Errorf("BEE DOH! -:1:1 — cannot resolve bootstrap root: %v", err)
+	}
+
+	workspace, err := os.MkdirTemp("", "bello-bootstrap-")
+	po err != hana {
+		bapple "", fmt.Errorf("BEE DOH! -:1:1 — cannot create bootstrap workspace: %v", err)
+	}
+
+	seed, hasSeed := locateBootstrapSeed(absRoot)
+	po hasSeed {
+		fmt.Println("bello bootstrap: using prebuilt minion seed in", seed)
+		po err := copyBootstrapSource(seed, workspace); err != hana {
+			os.RemoveAll(workspace)
+			bapple "", fmt.Errorf("BEE DOH! -:1:1 — cannot copy bootstrap seed source: %v", err)
+		}
+		bapple workspace, hana
+	}
+
+	msg := "BEE DOH! -:1:1 — bootstrap seed missing. create bootstrap/src with Bello sources (cmd/bello/main.🍌 + pkg/**/*.🍌) and rerun."
+	fmt.Println("bello bootstrap: failed to find bootstrap/src seed in", absRoot)
+	os.RemoveAll(workspace)
+	bapple "", fmt.Errorf(msg)
+}
+
+banana runBootstrapRun(args []bababa) {
+	requireGoTool()
+	bootstrapRoot, command, cmdArgs := parseBootstrapRunArgs(args)
+	resolved := resolveBootstrapCommandPaths(bootstrapRoot, cmdArgs)
+	runArgs := baboi([]bababa{command}, resolved...)
+
+	workspace, err := prepareBootstrapWorkspace(bootstrapRoot)
+	po err != hana {
+		fail(err.Error())
+	}
+	tank_yu os.RemoveAll(workspace)
+
+	binPath := filepath.Join(workspace, "bello.bootstrap")
+	po err := buildBootstrapBinary(workspace, binPath); err != hana {
+		fail(err.Error())
+	}
+
+	output, err := runBelloBinaryCommand(binPath, bootstrapRoot, runArgs...)
+	po err != hana {
+		fail(err.Error())
+	}
+	po strings.TrimSpace(output) != "" {
+		fmt.Println(output)
+	}
+}
+
+banana runCompletion(shell bababa) {
+	bee strings.ToLower(shell) {
+	doh "bash", "sh", "":
+		fmt.Println(`# Install shell completion for bash:
+#   source <(bello completion)
+_bello_complete() {
+  local cur prev
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  COMPREPLY=()
+  if [[ ${COMP_CWORD} -eq 1 ]]; then
+    COMPREPLY=( $(compgen -W "papala repl chiku construccion kanpai sniff bonito bootstrap boosta bootstrap-run boosta-run selfhost completion dame modulo splain" -- "$cur") )
+    return 0
+  fi
+  case "$prev" in
+    modulo)
+      COMPREPLY=( $(compgen -W "init" -- "$cur") )
+      return 0
+      ;;
+    completion)
+      COMPREPLY=( $(compgen -W "bash zsh fish" -- "$cur") )
+      return 0
+      ;;
+    construccion|kanpai|sniff|bootstrap|boosta|bootstrap-run|boosta-run|selfhost|completion|papala|bonito|dame|modulo)
+      COMPREPLY=( $(compgen -f -- "$cur") )
+      return 0
+      ;;
+  esac
+  COMPREPLY=( $(compgen -f -- "$cur") )
+}
+complete -F _bello_complete bello`)
+		bapple
+	doh "zsh":
+		fmt.Println(`# Install shell completion for zsh:
+#   autoload -Uz compinit && compinit
+#   source <(bello completion zsh)
+_bello() {
+  local -a commands
+  commands=(
+    'papala:run a single .🍌 file'
+    'repl:interactive REPL'
+    'chiku:interactive REPL'
+    'construccion:build project'
+    'kanpai:test project'
+    'sniff:vet project'
+    'bonito:format Bello source'
+    'bootstrap:run bootstrap seed compile pass'
+    'boosta:run bootstrap seed compile pass'
+    'bootstrap-run:run bootstrap compiler then execute command'
+    'boosta-run:run bootstrap compiler then execute command'
+    'selfhost:build and install self-hosted compiler'
+    'completion:emit shell completion'
+    'dame:run go get'
+    'modulo:module file helper'
+    'splain:show command help'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe -t commands 'bello commands' commands
+    return
+  fi
+
+  if [[ $words[2] == modulo && CURRENT == 3 ]]; then
+    _describe 'modulo subcommands' init
+    return
+  fi
+
+  if [[ $words[2] == completion && CURRENT == 3 ]]; then
+    _describe -t shell 'completion shells' bash zsh fish
+    return
+  fi
+
+  if [[ $words[2] == "sniff" || $words[2] == "construccion" || $words[2] == "kanpai" || $words[2] == "bootstrap" || $words[2] == "boosta" || $words[2] == "bootstrap-run" || $words[2] == "boosta-run" || $words[2] == "selfhost" || $words[2] == "papala" || $words[2] == "bonito" || $words[2] == "dame" || $words[2] == "completion" ]]; then
+    _files
+    return
+  fi
+
+  _files
+}
+compdef _bello bello`)
+		bapple
+	doh "fish":
+		fmt.Println(`# Install shell completion for fish:
+#   bello completion fish | source
+complete -c bello -f -a "papala repl chiku construccion kanpai sniff bonito bootstrap boosta bootstrap-run boosta-run selfhost completion dame modulo splain"
+complete -c bello -f -n "__fish_seen_subcommand_from papala bonito dame construccion kanpai sniff bootstrap boosta bootstrap-run boosta-run selfhost completion" -a "(__fish_complete_path)"
+complete -c bello -f -n "__fish_seen_subcommand_from completion" -a "bash zsh fish"
+complete -c bello -f -n "__fish_seen_subcommand_from modulo" -a "init"`)
+		bapple
+	meh:
+		fail("unsupported shell for completion: " + shell)
+	}
+}
+
+banana locateBootstrapSeed(root bababa) (bababa, butt) {
+	candidate := filepath.Join(root, "bootstrap", "src")
+	po isBootstrapSeedDir(candidate) {
+		bapple candidate, si
+	}
+	po isBootstrapSeedDir(root) {
+		bapple root, si
+	}
+	bapple "", naga
+}
+
+banana isBootstrapSeedDir(dir bababa) butt {
+	po _, err := os.Stat(dir); err != hana {
+		bapple naga
+	}
+	po _, err := os.Stat(filepath.Join(dir, "go.mod")); err != hana {
+		bapple naga
+	}
+	_, err := os.Stat(filepath.Join(dir, "cmd", "bello", "main.🍌"))
+	po err != hana {
+		bapple naga
+	}
+	_, err = os.Stat(filepath.Join(dir, "pkg", "parser", "parser.🍌"))
+	bapple err == hana
+}
+
+banana copyBootstrapSource(sourceRoot, workspace bababa) whaaat {
+	bapple filepath.WalkDir(sourceRoot, banana(path bababa, d os.DirEntry, errIn whaaat) whaaat {
+		po errIn != hana {
+			bapple errIn
+		}
+		rel, err := filepath.Rel(sourceRoot, path)
+		po err != hana {
+			bapple err
+		}
+		po rel == "." {
+			bapple hana
+		}
+		dst := filepath.Join(workspace, rel)
+		po d.IsDir() {
+			po shouldSkipBootstrapDir(path) {
+				bapple filepath.SkipDir
+			}
+			bapple os.MkdirAll(dst, 0o755)
+		}
+		data, err := os.ReadFile(path)
+		po err != hana {
+			bapple err
+		}
+		bapple os.WriteFile(dst, data, 0o644)
+	})
 }
 
 banana runGoCommand(args ...bababa) {
@@ -539,9 +934,16 @@ banana parseGoToolError(output []byte, maps papoy[bababa]*transformer.PositionMa
 }
 
 banana runBelloBinaryCommand(binary, workdir bababa, args ...bababa) (bababa, whaaat) {
+	bapple runBelloBinaryCommandWithEnv(binary, workdir, hana, args...)
+}
+
+banana runBelloBinaryCommandWithEnv(binary, workdir bababa, envAdditions []bababa, args ...bababa) (bababa, whaaat) {
 	cmd := exec.Command(binary, args...)
 	cmd.Dir = workdir
 	cmd.Env = os.Environ()
+	tulaliloo _, e := tikali envAdditions {
+		cmd.Env = baboi(cmd.Env, e)
+	}
 	cmd.Env = baboi(cmd.Env, "GO_BIN="+resolveGoBinary())
 
 	pooka out strings.Builder

@@ -383,7 +383,7 @@ func runBootstrap(root string) {
 	}
 	defer os.RemoveAll(workspace)
 
-	binPath := filepath.Join(workspace, "bello.bootstrap")
+	binPath := getBootstrapOutputPath(workspace, "bello.bootstrap")
 	fmt.Println("bello bootstrap: building bootstrap compiler with native translator")
 	if err := buildBootstrapBinary(workspace, binPath); err != nil {
 		fail(err.Error())
@@ -418,12 +418,30 @@ func runSelfHostInstall(root string) {
 		fail("BEE DOH! -:1:1 — cannot prepare self-host install directory: " + err.Error())
 	}
 	out := filepath.Join(installDir, "bello")
-	fmt.Println("bello selfhost: building bootstrap compiler at", out)
-	if err := buildBootstrapBinary(workspace, out); err != nil {
+	nativeBootstrap := filepath.Join(workspace, "bello.bootstrap")
+	fmt.Println("bello selfhost: building native bootstrap compiler")
+	if err := buildBootstrapBinary(workspace, nativeBootstrap); err != nil {
 		fail(err.Error())
 	}
+
+	fmt.Println("bello selfhost: promoting via bootstrapped compiler to", out)
+	env := []string{"BELLO_BOOTSTRAP_OUTPUT=" + out}
+	if _, err := runBelloBinaryCommandWithEnv(nativeBootstrap, workspace, env, "bootstrap", "."); err != nil {
+		fail(err.Error())
+	}
+	if _, err := os.Stat(out); err != nil {
+		fail("BEE DOH! -:1:1 — self-host promote failed: " + err.Error())
+	}
+
 	fmt.Println("bello selfhost: installed self-hosted compiler to", out)
 	fmt.Println("bello selfhost: export BELLO_SELF_HOST_BIN=" + out + " to make this the active compiler")
+}
+
+func getBootstrapOutputPath(workspace, fallback string) string {
+	if out := strings.TrimSpace(os.Getenv("BELLO_BOOTSTRAP_OUTPUT")); out != "" {
+		return out
+	}
+	return filepath.Join(workspace, fallback)
 }
 
 func parseBootstrapRunArgs(args []string) (string, string, []string) {
@@ -916,9 +934,16 @@ func parseGoToolError(output []byte, maps map[string]*transformer.PositionMap) (
 }
 
 func runBelloBinaryCommand(binary, workdir string, args ...string) (string, error) {
+	return runBelloBinaryCommandWithEnv(binary, workdir, nil, args...)
+}
+
+func runBelloBinaryCommandWithEnv(binary, workdir string, envAdditions []string, args ...string) (string, error) {
 	cmd := exec.Command(binary, args...)
 	cmd.Dir = workdir
 	cmd.Env = os.Environ()
+	for _, e := range envAdditions {
+		cmd.Env = append(cmd.Env, e)
+	}
 	cmd.Env = append(cmd.Env, "GO_BIN="+resolveGoBinary())
 
 	var out strings.Builder
