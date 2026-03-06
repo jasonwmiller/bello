@@ -139,27 +139,27 @@ kill "$SERVER_PID"
 
 ```bash
 # uses the committed minion seed in bootstrap/src,
-# builds a native bootstrap compiler, validates it by running
+# builds a native boosta compiler, validates it by running
 # `bello construccion` on the same tree, and can launch additional commands.
-# the bootstrap compiler can also be asked to emit a final binary when
+# the boosta compiler can also be asked to emit a final binary when
 # `BELLO_BOOTSTRAP_OUTPUT` is set.
-go run ./cmd/bello bootstrap .
+go run ./cmd/bello boosta .
 ```
 
 ### Bootstrap then execute through generated compiler
 
 ```bash
-# bootstrap with native compiler and immediately run an example
-go run ./cmd/bello bootstrap-run . papala examples/hello.🍌
+# boosta with native compiler and immediately run an example
+go run ./cmd/bello boosta-run . papala examples/hello.🍌
 
 # bootstrap and build the same project
-go run ./cmd/bello bootstrap-run . construccion .
+go run ./cmd/bello boosta-run . construccion .
 ```
 
 ### Promote bootstrapped compiler to active compiler
 
 ```bash
-go run ./cmd/bello selfhost .
+go run ./cmd/bello micasa .
 
 # self-hosted install step uses the bootstrapped compiler for the final promotion pass.
 # make self-hosted compiler active for current shell
@@ -169,7 +169,7 @@ export BELLO_SELF_HOST_BIN=$PWD/.bello/bello
 ./.bello/bello papala examples/hello.🍌
 ```
 
-`bello bootstrap` (or `bello boosta`) is the bootstrap lane for the next phase:
+`bello boosta` is the bootstrap lane for the next phase:
 - use committed `bootstrap/src` Bello compiler sources as the seed,
 - build `cmd/bello` with the current native translator,
 - run the newly built compiler through `construccion` on the same seed tree.
@@ -186,7 +186,7 @@ To regenerate seed files manually:
 go run ./tools/bootstrap_seed.go --source .
 ```
 
-Only rerun this when you intentionally want to refresh the committed Bello seed; the normal `bootstrap`/`selfhost` path requires `bootstrap/src` to already exist and will not auto-regenerate from Go.
+Only rerun this when you intentionally want to refresh the committed Bello seed; the normal `boosta`/`micasa` path requires `bootstrap/src` to already exist and will not auto-regenerate from Go.
 
 ### REPL
 
@@ -253,11 +253,9 @@ slice 3 : baz
  go run ./cmd/bello completion [bash|zsh|fish]
 
 # run bootstrap validation lane
- go run ./cmd/bello bootstrap [dir]
  go run ./cmd/bello boosta [dir]
- go run ./cmd/bello bootstrap-run [dir] <command> [args...]
  go run ./cmd/bello boosta-run [dir] <command> [args...]
- go run ./cmd/bello selfhost [dir]
+ go run ./cmd/bello micasa [dir]
 ```
 
 ## Behavior and mappings
@@ -278,11 +276,11 @@ Bello syntax is translated with a keyword/predeclared mapping layer in the trans
 
 `/.github/workflows/ci.yml` runs:
 - `go test ./...`
-- `go run ./cmd/bello bootstrap .`
-- `go run ./cmd/bello selfhost .`
+- `go run ./cmd/bello boosta .`
+- `go run ./cmd/bello micasa .`
 - Self-hosted verification with `.bello/bello`:
   - `kanpai examples/hello.🍌`
-  - `bootstrap .`
+- `go run ./cmd/bello boosta .`
   - compile checks for every `examples/**/*.🍌` file
 
 > Note: when `BELLO_SELF_HOST_BIN` points to `.bello/bello` (or it is found by walking parent directories), `bello` automatically routes regular commands through the self-hosted compiler. This keeps day-to-day usage non-interactive and fully automated.

@@ -24,15 +24,15 @@ jobs:
       - name: Validate native pipeline
         run: go test ./...
       - name: Build native bootstrap compiler artifact cache
-        run: go run ./cmd/bello bootstrap .
+        run: go run ./cmd/bello boosta .
       - name: Install self-hosted compiler
-        run: go run ./cmd/bello selfhost .
+        run: go run ./cmd/bello micasa .
       - name: Run tests through self-hosted compiler
         env:
           BELLO_SELF_HOST_BIN: ${{ github.workspace }}/.bello/bello
         run: |
           "$BELLO_SELF_HOST_BIN" kanpai examples/hello.🍌
-          "$BELLO_SELF_HOST_BIN" bootstrap .
+          "$BELLO_SELF_HOST_BIN" boosta .
       - name: Validate examples with self-hosted compiler
         env:
           BELLO_SELF_HOST_BIN: ${{ github.workspace }}/.bello/bello
@@ -85,7 +85,7 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-        run: go run ./cmd/bello selfhost .
+        run: go run ./cmd/bello micasa .
       - name: Package self-hosted compiler
         run: |
           mkdir -p dist

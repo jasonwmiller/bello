@@ -49,11 +49,11 @@ func main() {
 		runProjectCommand(expectArgOrDot(2), "vet")
 	case "bonito":
 		runBonito(expectArg("bonito"))
-	case "bootstrap", "boosta":
+	case "boosta":
 		runBootstrap(expectArgOrDot(2))
-	case "bootstrap-run", "boosta-run":
+	case "boosta-run":
 		runBootstrapRun(os.Args[2:])
-	case "selfhost":
+	case "micasa":
 		runSelfHostInstall(expectArgOrDot(2))
 	case "dame":
 		runGoCommand("get", expectArg("dame"))
@@ -159,7 +159,7 @@ func tryUseSelfhostedCompiler(args []string) {
 
 func isSelfhostSkipCommand(command string) bool {
 	switch command {
-	case "bootstrap", "boosta", "bootstrap-run", "boosta-run", "selfhost":
+	case "boosta", "boosta-run", "micasa":
 		return true
 	default:
 		return false
@@ -202,11 +202,9 @@ func printUsage() {
 	fmt.Println("bello chiku")
 	fmt.Println("bello construccion [dir]")
 	fmt.Println("bello kanpai [dir]")
-	fmt.Println("bello bootstrap [dir]")
 	fmt.Println("bello boosta [dir]")
-	fmt.Println("bello bootstrap-run [dir] <command> [args...]")
 	fmt.Println("bello boosta-run [dir] <command> [args...]")
-	fmt.Println("bello selfhost [dir]")
+	fmt.Println("bello micasa [dir]")
 	fmt.Println("bello bonito file.🍌")
 	fmt.Println("bello dame pkg")
 	fmt.Println("bello modulo init name")
@@ -384,16 +382,16 @@ func runBootstrap(root string) {
 	defer os.RemoveAll(workspace)
 
 	binPath := getBootstrapOutputPath(workspace, "bello.bootstrap")
-	fmt.Println("bello bootstrap: building bootstrap compiler with native translator")
+	fmt.Println("bello boosta: building bootstrap compiler with native translator")
 	if err := buildBootstrapBinary(workspace, binPath); err != nil {
 		fail(err.Error())
 	}
 
-	fmt.Println("bello bootstrap: validating bootstrap compiler self-host pass")
+	fmt.Println("bello boosta: validating bootstrap compiler self-host pass")
 	if _, err := runBelloBinaryCommand(binPath, workspace, "construccion", "."); err != nil {
 		fail(err.Error())
 	}
-	fmt.Println("bello bootstrap: self-host validation complete")
+	fmt.Println("bello boosta: self-host validation complete")
 }
 
 func runSelfHostInstall(root string) {
@@ -419,22 +417,22 @@ func runSelfHostInstall(root string) {
 	}
 	out := filepath.Join(installDir, "bello")
 	nativeBootstrap := filepath.Join(workspace, "bello.bootstrap")
-	fmt.Println("bello selfhost: building native bootstrap compiler")
+	fmt.Println("bello micasa: building native bootstrap compiler")
 	if err := buildBootstrapBinary(workspace, nativeBootstrap); err != nil {
 		fail(err.Error())
 	}
 
-	fmt.Println("bello selfhost: promoting via bootstrapped compiler to", out)
+	fmt.Println("bello micasa: promoting via bootstrapped compiler to", out)
 	env := []string{"BELLO_BOOTSTRAP_OUTPUT=" + out}
-	if _, err := runBelloBinaryCommandWithEnv(nativeBootstrap, workspace, env, "bootstrap", "."); err != nil {
+	if _, err := runBelloBinaryCommandWithEnv(nativeBootstrap, workspace, env, "boosta", "."); err != nil {
 		fail(err.Error())
 	}
 	if _, err := os.Stat(out); err != nil {
 		fail("BEE DOH! -:1:1 — self-host promote failed: " + err.Error())
 	}
 
-	fmt.Println("bello selfhost: installed self-hosted compiler to", out)
-	fmt.Println("bello selfhost: export BELLO_SELF_HOST_BIN=" + out + " to make this the active compiler")
+	fmt.Println("bello micasa: installed self-hosted compiler to", out)
+	fmt.Println("bello micasa: export BELLO_SELF_HOST_BIN=" + out + " to make this the active compiler")
 }
 
 func getBootstrapOutputPath(workspace, fallback string) string {
@@ -446,7 +444,7 @@ func getBootstrapOutputPath(workspace, fallback string) string {
 
 func parseBootstrapRunArgs(args []string) (string, string, []string) {
 	if len(args) < 2 {
-		fail("usage: bello bootstrap-run [dir] <command> [args...]")
+		fail("usage: bello boosta-run [dir] <command> [args...]")
 	}
 
 	first := args[0]
@@ -455,14 +453,14 @@ func parseBootstrapRunArgs(args []string) (string, string, []string) {
 	}
 
 	if len(args) < 3 {
-		fail("usage: bello bootstrap-run [dir] <command> [args...]")
+		fail("usage: bello boosta-run [dir] <command> [args...]")
 	}
 	return first, args[1], args[2:]
 }
 
 func isBelloCommand(candidate string) bool {
 	switch candidate {
-	case "papala", "repl", "chiku", "construccion", "kanpai", "sniff", "bonito", "bootstrap", "boosta", "bootstrap-run", "boosta-run", "completion", "dame", "modulo", "splain":
+	case "papala", "repl", "chiku", "construccion", "kanpai", "sniff", "bonito", "boosta", "boosta-run", "micasa", "completion", "dame", "modulo", "splain":
 		return true
 	default:
 		return false
@@ -518,7 +516,7 @@ func prepareBootstrapWorkspace(root string) (string, error) {
 
 	seed, hasSeed := locateBootstrapSeed(absRoot)
 	if hasSeed {
-		fmt.Println("bello bootstrap: using prebuilt minion seed in", seed)
+		fmt.Println("bello boosta: using prebuilt minion seed in", seed)
 		if err := copyBootstrapSource(seed, workspace); err != nil {
 			os.RemoveAll(workspace)
 			return "", fmt.Errorf("BEE DOH! -:1:1 — cannot copy bootstrap seed source: %v", err)
@@ -526,8 +524,8 @@ func prepareBootstrapWorkspace(root string) (string, error) {
 		return workspace, nil
 	}
 
-	msg := "BEE DOH! -:1:1 — bootstrap seed missing. create bootstrap/src with Bello sources (cmd/bello/main.🍌 + pkg/**/*.🍌) and rerun."
-	fmt.Println("bello bootstrap: failed to find bootstrap/src seed in", absRoot)
+	msg := "BEE DOH! -:1:1 — boosta seed missing. create bootstrap/src with Bello sources (cmd/bello/main.🍌 + pkg/**/*.🍌) and rerun."
+	fmt.Println("bello boosta: failed to find bootstrap/src seed in", absRoot)
 	os.RemoveAll(workspace)
 	return "", fmt.Errorf(msg)
 }
@@ -569,7 +567,7 @@ _bello_complete() {
   prev="${COMP_WORDS[COMP_CWORD-1]}"
   COMPREPLY=()
   if [[ ${COMP_CWORD} -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W "papala repl chiku construccion kanpai sniff bonito bootstrap boosta bootstrap-run boosta-run selfhost completion dame modulo splain" -- "$cur") )
+    COMPREPLY=( $(compgen -W "papala repl chiku construccion kanpai sniff bonito boosta boosta-run micasa completion dame modulo splain" -- "$cur") )
     return 0
   fi
   case "$prev" in
@@ -581,7 +579,7 @@ _bello_complete() {
       COMPREPLY=( $(compgen -W "bash zsh fish" -- "$cur") )
       return 0
       ;;
-    construccion|kanpai|sniff|bootstrap|boosta|bootstrap-run|boosta-run|selfhost|completion|papala|bonito|dame|modulo)
+    construccion|kanpai|sniff|boosta|boosta-run|micasa|completion|papala|bonito|dame|modulo)
       COMPREPLY=( $(compgen -f -- "$cur") )
       return 0
       ;;
@@ -604,11 +602,9 @@ _bello() {
     'kanpai:test project'
     'sniff:vet project'
     'bonito:format Bello source'
-    'bootstrap:run bootstrap seed compile pass'
     'boosta:run bootstrap seed compile pass'
-    'bootstrap-run:run bootstrap compiler then execute command'
     'boosta-run:run bootstrap compiler then execute command'
-    'selfhost:build and install self-hosted compiler'
+    'micasa:build and install self-hosted compiler'
     'completion:emit shell completion'
     'dame:run go get'
     'modulo:module file helper'
@@ -630,7 +626,7 @@ _bello() {
     return
   fi
 
-  if [[ $words[2] == "sniff" || $words[2] == "construccion" || $words[2] == "kanpai" || $words[2] == "bootstrap" || $words[2] == "boosta" || $words[2] == "bootstrap-run" || $words[2] == "boosta-run" || $words[2] == "selfhost" || $words[2] == "papala" || $words[2] == "bonito" || $words[2] == "dame" || $words[2] == "completion" ]]; then
+  if [[ $words[2] == "sniff" || $words[2] == "construccion" || $words[2] == "kanpai" || $words[2] == "boosta" || $words[2] == "boosta-run" || $words[2] == "micasa" || $words[2] == "papala" || $words[2] == "bonito" || $words[2] == "dame" || $words[2] == "completion" ]]; then
     _files
     return
   fi
@@ -642,8 +638,8 @@ compdef _bello bello`)
 	case "fish":
 		fmt.Println(`# Install shell completion for fish:
 #   bello completion fish | source
-complete -c bello -f -a "papala repl chiku construccion kanpai sniff bonito bootstrap boosta bootstrap-run boosta-run selfhost completion dame modulo splain"
-complete -c bello -f -n "__fish_seen_subcommand_from papala bonito dame construccion kanpai sniff bootstrap boosta bootstrap-run boosta-run selfhost completion" -a "(__fish_complete_path)"
+complete -c bello -f -a "papala repl chiku construccion kanpai sniff bonito boosta boosta-run micasa completion dame modulo splain"
+complete -c bello -f -n "__fish_seen_subcommand_from papala bonito dame construccion kanpai sniff boosta boosta-run micasa completion" -a "(__fish_complete_path)"
 complete -c bello -f -n "__fish_seen_subcommand_from completion" -a "bash zsh fish"
 complete -c bello -f -n "__fish_seen_subcommand_from modulo" -a "init"`)
 		return
@@ -951,7 +947,7 @@ func runBelloBinaryCommandWithEnv(binary, workdir string, envAdditions []string,
 	cmd.Stderr = &out
 	err := cmd.Run()
 	if err != nil {
-		return strings.TrimSpace(out.String()), fmt.Errorf("BEE DOH! bootstrap runner failed: %w: %s", err, strings.TrimSpace(out.String()))
+		return strings.TrimSpace(out.String()), fmt.Errorf("BEE DOH! boosta runner failed: %w: %s", err, strings.TrimSpace(out.String()))
 	}
 	return strings.TrimSpace(out.String()), nil
 }
@@ -959,7 +955,7 @@ func runBelloBinaryCommandWithEnv(binary, workdir string, envAdditions []string,
 func buildBootstrapBinary(sourceRoot, out string) error {
 	res, err := buildProjectFromBello(sourceRoot)
 	if err != nil {
-		return fmt.Errorf("BEE DOH! bootstrap seed build failed: %v", err)
+		return fmt.Errorf("BEE DOH! boosta seed build failed: %v", err)
 	}
 	defer os.RemoveAll(res.Workdir)
 
@@ -978,9 +974,9 @@ func buildBootstrapBinary(sourceRoot, out string) error {
 
 func wrapMappedError(msg string, errCount int, err error) error {
 	if errCount > 0 {
-		return fmt.Errorf("BEE DOH! bootstrap translation failed: %s", msg)
+		return fmt.Errorf("BEE DOH! boosta translation failed: %s", msg)
 	}
-	return fmt.Errorf("BEE DOH! bootstrap translation failed: %v", err)
+	return fmt.Errorf("BEE DOH! boosta translation failed: %v", err)
 }
 
 func copyBootstrapModuleFiles(sourceRoot, workspace string) error {

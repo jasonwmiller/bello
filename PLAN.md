@@ -93,13 +93,13 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 3. Round-trip tests: parse -> format -> reparse AST
 
 ## Phase 10 — Self-host bootstrap
-1. Add deterministic bootstrap command for seeded Bello compiler bootstrap.
-2. Prefer committed `bootstrap/src` as bootstrap input when present.
-3. Require committed `bootstrap/src` as the bootstrap source of truth for build operations.
+1. Add deterministic boosta command for seeded Bello compiler boosta.
+2. Prefer committed `bootstrap/src` as boosta input when present.
+3. Require committed `bootstrap/src` as the boosta source of truth for build operations.
 4. Keep repeatable seed refresh tooling documented for intentional updates.
-5. Add a self-host validation pass: bootstrap binary `./cmd/bello` builds and then runs `construccion`.
-6. Add `bootstrap-run` (`boosta-run`) command that builds a bootstrap compiler and immediately runs a requested Bello subcommand on the source tree.
-7. Add `selfhost` activation flow: build/install self-hosted compiler into `.bello/bello` for opt-in native replacement.
+5. Add a self-host validation pass: native bootstrap build compiles Bello from `./cmd/bello` and runs `construccion` to verify it.
+6. Add `boosta-run` command that builds a bootstrap compiler and immediately runs a requested Bello subcommand on the source tree.
+7. Add `micasa` activation flow: build/install self-hosted compiler into `.bello/bello` for opt-in native replacement.
 
 ## Current implementation status
 
@@ -126,9 +126,9 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - continue refining `bonito` formatting parity (spacing/comments and edge-case conversions) while keeping AST round-trip stable.
 
 ### Delivery status
-- CLI commands currently verified: `bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`, `bello dame`, `bello modulo init`, `bello bootstrap`, `bello boosta`, `bello bootstrap-run`, `bello boosta-run`, and `bello splain`; examples execute successfully through generated compiler paths.
+- CLI commands currently verified: `bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`, `bello dame`, `bello modulo init`, `bello boosta`, `bello boosta-run`, `bello micasa`, and `bello splain`; examples execute successfully through generated compiler paths.
 - All `examples/*.🍌` and nested `examples/http3/*.🍌` build successfully with `bello construccion`.
-- `bootstrap/src` is committed as a seed mirror and is used directly by `bello bootstrap`.
+- `bootstrap/src` is committed as a seed mirror and is used directly by `bello boosta`.
 - Seed refresh tooling is documented and available via `go run ./tools/bootstrap_seed.go --source .`.
 - GitHub Actions workflow added for:
   - native CI + native bootstrap pass

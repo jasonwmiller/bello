@@ -18,10 +18,9 @@ Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` 
 - `go run ./cmd/bello sniff [dir]`
 - `go run ./cmd/bello bonito <file.🍌>`
 - `go run ./cmd/bello completion [bash|zsh|fish]`
-- `go run ./cmd/bello bootstrap .`
-- `go run ./cmd/bello bootstrap-run . <command> [args...]`
+- `go run ./cmd/bello boosta .`
 - `go run ./cmd/bello boosta-run . <command> [args...]`
-- `go run ./cmd/bello selfhost .`
+- `go run ./cmd/bello micasa .`
 - `BELLO_SELF_HOST_BIN=/path/to/.bello/bello go run ./cmd/bello <command>` (delegates to self-hosted compiler when present)
 - `go run ./cmd/bello modulo init <name>`
 - `go run ./cmd/bello dame <pkg>`
@@ -32,8 +31,8 @@ Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` 
 - `go test ./...` is the baseline validation command.
 - CI runs native and self-hosted checks:
   - `go test ./...`
-  - `go run ./cmd/bello bootstrap .` (uses committed `bootstrap/src` Bello seed)
-  - `go run ./cmd/bello selfhost .` (native bootstrap then bootstrapped compiler promotion to `.bello/bello`)
+  - `go run ./cmd/bello boosta .` (uses committed `bootstrap/src` Bello seed)
+  - `go run ./cmd/bello micasa .` (native bootstrap then bootstrapped compiler promotion to `.bello/bello`)
   - `go run ./.bello/bello kanpai examples/hello.🍌` (self-hosted compile/test flow)
   - `go run ./.bello/bello construccion <example.🍌>` for each example file
 - `./.github/workflows/ci.yml` releases these binaries:
