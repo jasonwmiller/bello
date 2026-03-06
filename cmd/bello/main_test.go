@@ -1,12 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
+	"sync"
+)
+
+var (
+	builtOnce   sync.Once
+	buildErr    error
 )
 
 func TestBelloCLI_Bonito(t *testing.T) {
@@ -18,8 +25,8 @@ func TestBelloCLI_Bonito(t *testing.T) {
 	if !strings.Contains(out, "kampung") {
 		t.Fatalf("bonito output missing keyword mapping: %q", out)
 	}
-	if !strings.Contains(out, "poopaye") {
-		t.Fatalf("bonito output missing built-in rewrite: %q", out)
+	if !strings.Contains(out, "blabla") {
+		t.Fatalf("bonito output missing stdlib call rewrite: %q", out)
 	}
 }
 
@@ -33,8 +40,11 @@ func TestBelloCLI_ProjectCommands(t *testing.T) {
 	if err := copyFile(fixtureSrc, targetSrc); err != nil {
 		t.Fatalf("prepare fixture: %v", err)
 	}
+	if err := os.WriteFile(filepath.Join(workDir, "go.mod"), []byte("module example.com/bello-demo\n\ngo 1.24\n"), 0o644); err != nil {
+		t.Fatalf("prepare fixture module: %v", err)
+	}
 
-	out := runBelloCommand(t, goBin, workDir, nil, "papala", targetSrc)
+	out := runBelloCommand(t, goBin, workDir, map[string]string{"GO111MODULE": "off"}, "papala", targetSrc)
 	if strings.TrimSpace(out) != "bello" {
 		t.Fatalf("papala output = %q", out)
 	}
@@ -63,8 +73,10 @@ func TestBelloCLI_MockModuleInit(t *testing.T) {
 
 func runBelloCommand(t *testing.T, goBinary, workDir string, env map[string]string, args ...string) string {
 	t.Helper()
-	cmdPath := filepath.Join(repoRootForTests(), "cmd", "bello")
-	cmd := exec.Command(goBinary, "run", cmdPath, args...)
+
+	binary := buildBelloBinary(t, goBinary)
+	cmdArgs := append([]string{}, args...)
+	cmd := exec.Command(binary, cmdArgs...)
 	cmd.Dir = workDir
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "GO_BIN="+goBinary)
@@ -76,6 +88,30 @@ func runBelloCommand(t *testing.T, goBinary, workDir string, env map[string]stri
 		t.Fatalf("run bello %s: %v\noutput=%s", strings.Join(args, " "), err, string(out))
 	}
 	return strings.TrimSpace(string(out))
+}
+
+func buildBelloBinary(t *testing.T, goBinary string) string {
+	t.Helper()
+
+	root := repoRootForTests()
+	output := filepath.Join(root, ".tools", "bello-integration")
+	builtOnce.Do(func() {
+		if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
+			buildErr = err
+			return
+		}
+		cmd := exec.Command(goBinary, "build", "-o", output, "./cmd/bello")
+		cmd.Dir = root
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			buildErr = fmt.Errorf("build bello binary: %w: %s", err, strings.TrimSpace(string(out)))
+			return
+		}
+	})
+	if buildErr != nil {
+		t.Fatal(buildErr)
+	}
+	return output
 }
 
 func mustResolveGoBinaryForTest(t *testing.T) string {
@@ -118,5 +154,5 @@ func copyFile(src, dst string) error {
 // repoRootForTests captures the package directory at runtime without additional filesystem scans.
 func repoRootForTests() string {
 	_, filename, _, _ := runtime.Caller(0)
-	return filepath.Join(filepath.Dir(filepath.Dir(filepath.Dir(filename)))
+	return filepath.Join(filepath.Dir(filepath.Dir(filepath.Dir(filename))))
 }

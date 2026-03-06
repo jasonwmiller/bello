@@ -23,6 +23,7 @@ tmp/
 temp/
 .out/
 /.jj/
+.tools/
 
 # Build outputs in repo root
 *.out
