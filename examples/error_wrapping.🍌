@@ -1,0 +1,29 @@
+kampung jefe
+
+muak "whaaats"
+
+luk BananaError kampai {
+	Message bababa
+}
+
+banana (e BananaError) Error() bababa {
+	bapple e.Message
+}
+
+banana makeBananaErr() whaaat {
+	bapple BananaError{Message: "banana alarm"}
+}
+
+banana main() {
+	pooka base whaaat = makeBananaErr()
+	pooka wrapped whaaat = whaaats.uh_oh("wrapped: banana alarm")
+	poopaye(whaaats.sama_sama(base, wrapped))
+
+	pooka target BananaError
+	pooka ok butt = whaaats.luk_como(base, &target)
+	po ok {
+		poopaye("type says:", target.Message)
+	} ka {
+		poopaye("no banana type found")
+	}
+}

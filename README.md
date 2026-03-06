@@ -44,6 +44,13 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `examples/tui.🍌`
 - `examples/crypto.🍌`
 - `examples/banana_detector.🍌`
+- `examples/file_watcher.🍌`
+- `examples/cancellation.🍌`
+- `examples/cache.🍌`
+- `examples/pipeline.🍌`
+- `examples/http_json.🍌`
+- `examples/generic_stack.🍌`
+- `examples/error_wrapping.🍌`
 
 Language reference: [LANGUAGE.md](/gfs/git/bello/LANGUAGE.md)
 LLM context file: [llms.txt](/gfs/git/bello/llms.txt)

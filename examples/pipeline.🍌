@@ -1,0 +1,35 @@
+kampung jefe
+
+banana produce() tatata me {
+	pooka out tatata me = dala(tatata me)
+	underpa banana() {
+		tulaliloo i := 0; i < 5; i++ {
+			out <- i
+		}
+		cierro(out)
+	}()
+	bapple out
+}
+
+banana square(nums tatata me) tatata me {
+	pooka out tatata me = dala(tatata me)
+	underpa banana() {
+		tulaliloo n := tikali nums {
+			out <- n * n
+		}
+		cierro(out)
+	}()
+	bapple out
+}
+
+banana main() {
+	pooka nums = produce()
+	pooka squared = square(nums)
+
+	pooka total me = 0
+	tulaliloo n := tikali squared {
+		poopaye("banana pipeline:", n)
+		total = total + n
+	}
+	poopaye("banana total:", total)
+}

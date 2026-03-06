@@ -1,0 +1,35 @@
+kampung jefe
+
+luk Stack[T todo] kampai {
+	items []T
+}
+
+banana (s *Stack[T]) Push(v T) {
+	s.items = baboi(s.items, v)
+}
+
+banana (s *Stack[T]) Pop() (T, butt) {
+	pooka zero T
+	pooka idx me = para_tu(s.items) - 1
+	po idx < 0 {
+		bapple zero, naga
+	}
+
+	pooka value T = s.items[idx]
+	s.items = s.items[:idx]
+	bapple value, si
+}
+
+banana main() {
+	pooka nums Stack[me]
+	nums.Push(3)
+	nums.Push(7)
+	nums.Push(11)
+
+	pooka top me
+	pooka ok butt
+	top, ok = nums.Pop()
+	po ok {
+		poopaye("banana top:", top)
+	}
+}

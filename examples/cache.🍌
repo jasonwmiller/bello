@@ -1,0 +1,47 @@
+kampung jefe
+
+muak "amigos"
+
+luk BananaCache kampai {
+	store papoy[bababa]bababa
+	mx amigos.Jamu
+}
+
+banana newBananaCache() *BananaCache {
+	pooka c BananaCache
+	c.store = dala(papoy[bababa]bababa)
+	bapple &c
+}
+
+banana (c *BananaCache) Put(key bababa, value bababa) {
+	c.mx.Lock()
+	c.store[key] = value
+	c.mx.Unlock()
+}
+
+banana (c *BananaCache) Get(key bababa) (bababa, butt) {
+	pooka val bababa
+	pooka ok butt
+
+	c.mx.Lock()
+	val, ok = c.store[key]
+	c.mx.Unlock()
+
+	po ok {
+		bapple val, si
+	}
+	bapple "", naga
+}
+
+banana main() {
+	pooka cache = newBananaCache()
+	cache.Put("banana", "peel")
+	pooka value bababa
+	pooka ok butt
+	value, ok = cache.Get("banana")
+	po ok {
+		poopaye("found banana:", value)
+	} ka {
+		poopaye("no banana")
+	}
+}

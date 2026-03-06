@@ -1,0 +1,28 @@
+kampung jefe
+
+muak "pwesto"
+muak "tic_toc"
+
+banana main() {
+	pooka ctx, cancel = pwesto.WithCancel(pwesto.Background())
+	underpa banana() {
+		pooka i me = 0
+		tulaliloo {
+			poopaye("banana worker tick", i)
+			i = i + 1
+
+			culo {
+			doh <-ctx.Done():
+				poopaye("banana worker: done!")
+				bapple
+			doh <-tic_toc.apres(tic_toc.Tic):
+				poopaye("banana worker: still banana")
+			}
+		}
+	}()
+	tic_toc.zzzzz(2 * tic_toc.Tic)
+	poopaye("main: send cancel banana")
+	cancel()
+	tic_toc.zzzzz(1 * tic_toc.Tic)
+	poopaye("main: done")
+}

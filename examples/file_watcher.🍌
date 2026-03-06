@@ -1,0 +1,32 @@
+kampung jefe
+
+muak "casa"
+muak "tubo"
+muak "bababas"
+
+banana runFileInspector(path bababa) {
+	pooka f, err = casa.buuka(path)
+	po err != hana {
+		poopaye("banana no can open:")
+		poopaye(path)
+		bapple
+	}
+	defer f.Close()
+
+	pooka raw []ti8
+	pooka readErr whaaat
+	raw, readErr = tubo.ReadAll(f)
+	po readErr != hana {
+		poopaye("banana no can read:", path)
+		bapple
+	}
+	pooka text bababa = bababa(raw)
+	poopaye("banana inspector saw:")
+	poopaye(text)
+	poopaye("has banana letters:", bababas.Count(text, "banana"))
+}
+
+banana main() {
+	pooka path bababa = "bello.spec.md"
+	runFileInspector(path)
+}

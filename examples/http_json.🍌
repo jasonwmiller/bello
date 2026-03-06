@@ -1,0 +1,34 @@
+kampung jefe
+
+muak "la_red"
+muak "kotak"
+
+luk BananaPayload kampai {
+	Message bababa
+	BananaCount me
+}
+
+banana handler(w la_red.Reponsu, r *la_red.Juseyo) {
+	pooka payload BananaPayload
+	payload = BananaPayload{
+		Message: "banana",
+		BananaCount: 3,
+	}
+	pooka body []ti8
+	pooka err whaaat
+	body, err = kotak.Marshal(payload)
+	po err != hana {
+		poopaye("json fail:", err)
+		bapple
+	}
+	w.Write(body)
+	poopaye("served banana json")
+}
+
+banana main() {
+	la_red.ooh_ooh("/bananas", handler)
+	pooka err whaaat = la_red.bello_bello(":8081", hana)
+	po err != hana {
+		poopaye("http start failed:", err)
+	}
+}
