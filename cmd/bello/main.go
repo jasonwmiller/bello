@@ -332,43 +332,85 @@ func runCompletion(shell string) {
 		fmt.Println(`# Install shell completion for bash:
 #   source <(bello completion)
 _bello_complete() {
-	local cur prev
-	cur="${COMP_WORDS[COMP_CWORD]}"
-	prev="${COMP_WORDS[COMP_CWORD-1]}"
-	COMPREPLY=()
-	if [[ ${COMP_CWORD} -eq 1 ]]; then
-		COMPREPLY=( $(compgen -W "papala repl chiku construccion kanpai sniff bonito bootstrap boosta completion dame modulo splain" -- "$cur") )
-		return 0
-	fi
-	case "$prev" in
-		modulo)
-			COMPREPLY=( $(compgen -W "init" -- "$cur") )
-			return 0
-			;;
-		construccion|kanpai|sniff|bootstrap|boosta|completion|papala|bonito|dame)
-			COMPREPLY=( $(compgen -f -- "$cur") )
-			return 0
-			;;
-	esac
-	COMPREPLY=( $(compgen -f -- "$cur") )
+  local cur prev
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  COMPREPLY=()
+  if [[ ${COMP_CWORD} -eq 1 ]]; then
+    COMPREPLY=( $(compgen -W "papala repl chiku construccion kanpai sniff bonito bootstrap boosta completion dame modulo splain" -- "$cur") )
+    return 0
+  fi
+  case "$prev" in
+    modulo)
+      COMPREPLY=( $(compgen -W "init" -- "$cur") )
+      return 0
+      ;;
+    completion)
+      COMPREPLY=( $(compgen -W "bash zsh fish" -- "$cur") )
+      return 0
+      ;;
+    construccion|kanpai|sniff|bootstrap|boosta|completion|papala|bonito|dame|modulo)
+      COMPREPLY=( $(compgen -f -- "$cur") )
+      return 0
+      ;;
+  esac
+  COMPREPLY=( $(compgen -f -- "$cur") )
 }
-complete -F _bello_complete bello` + "\n")
+complete -F _bello_complete bello`)
 		return
 	case "zsh":
 		fmt.Println(`# Install shell completion for zsh:
 #   autoload -Uz compinit && compinit
 #   source <(bello completion zsh)
 _bello() {
-  local -a cmds
-  cmds=("papala" "repl" "chiku" "construccion" "kanpai" "sniff" "bonito" "bootstrap" "boosta" "completion" "dame" "modulo" "splain")
-  _describe 'bello command' cmds
+  local -a commands
+  commands=(
+    'papala:run a single .🍌 file'
+    'repl:interactive REPL'
+    'chiku:interactive REPL'
+    'construccion:build project'
+    'kanpai:test project'
+    'sniff:vet project'
+    'bonito:format Bello source'
+    'bootstrap:run bootstrap seed compile pass'
+    'boosta:run bootstrap seed compile pass'
+    'completion:emit shell completion'
+    'dame:run go get'
+    'modulo:module file helper'
+    'splain:show command help'
+  )
+
+  if (( CURRENT == 2 )); then
+    _describe -t commands 'bello commands' commands
+    return
+  fi
+
+  if [[ $words[2] == modulo && CURRENT == 3 ]]; then
+    _describe 'modulo subcommands' init
+    return
+  fi
+
+  if [[ $words[2] == completion && CURRENT == 3 ]]; then
+    _describe -t shell 'completion shells' bash zsh fish
+    return
+  fi
+
+  if [[ $words[2] == "sniff" || $words[2] == "construccion" || $words[2] == "kanpai" || $words[2] == "bootstrap" || $words[2] == "boosta" || $words[2] == "papala" || $words[2] == "bonito" || $words[2] == "dame" || $words[2] == "completion" ]]; then
+    _files
+    return
+  fi
+
+  _files
 }
 compdef _bello bello`)
 		return
 	case "fish":
 		fmt.Println(`# Install shell completion for fish:
 #   bello completion fish | source
-complete -c bello -n "__fish_use_subcommand" -a "papala repl chiku construccion kanpai sniff bonito bootstrap boosta completion dame modulo splain"`)
+complete -c bello -f -a "papala repl chiku construccion kanpai sniff bonito bootstrap boosta completion dame modulo splain"
+complete -c bello -f -n "__fish_seen_subcommand_from papala bonito dame construccion kanpai sniff bootstrap boosta completion" -a "(__fish_complete_path)"
+complete -c bello -f -n "__fish_seen_subcommand_from completion" -a "bash zsh fish"
+complete -c bello -f -n "__fish_seen_subcommand_from modulo" -a "init"`)
 		return
 	default:
 		fail("unsupported shell for completion: " + shell)
