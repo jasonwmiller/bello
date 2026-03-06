@@ -70,6 +70,39 @@ LLM context file: [llms.txt](/gfs/git/bello/llms.txt)
 - Go toolchain (1.23+), discovered via `PATH` or fallback paths
 - Supported platforms can execute commands through Go toolchain wrappers in CLI
 
+## Install and shell integration
+
+- Installed mode (recommended):
+
+```bash
+go install ./cmd/bello
+
+# verify installed command
+bello splain
+```
+
+Once installed, `bello` directly runs the native translator and Go tooling (`go run`, `go build`, `go test`, `go vet`, `go get`) for each command.
+
+- Source mode (repo checkout):
+
+```bash
+# quick local entrypoint (temporary)
+alias bello='go run /absolute/path/to/repo/cmd/bello'
+```
+
+Enable shell autocomplete:
+
+```bash
+# bash
+source <(bello completion)
+
+# zsh
+source <(bello completion zsh)
+
+# fish
+bello completion fish | source
+```
+
 ## Building and Running
 
 ### Run a single file
@@ -188,6 +221,9 @@ slice 3 : baz
 
 # show short help text
  go run ./cmd/bello splain
+
+# shell completion
+ go run ./cmd/bello completion [bash|zsh|fish]
 
 # run bootstrap validation lane
  go run ./cmd/bello bootstrap [dir]

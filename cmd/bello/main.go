@@ -58,6 +58,12 @@ func main() {
 		runModuloInit(os.Args[3])
 	case "splain":
 		fmt.Println("Bello transpiler: .🍌 -> Go source")
+	case "completion":
+		shell := "bash"
+		if len(os.Args) > 2 {
+			shell = os.Args[2]
+		}
+		runCompletion(shell)
 	default:
 		printUsage()
 		os.Exit(1)
@@ -108,6 +114,7 @@ func printUsage() {
 	fmt.Println("bello bonito file.🍌")
 	fmt.Println("bello dame pkg")
 	fmt.Println("bello modulo init name")
+	fmt.Println("bello completion [bash|zsh|fish]")
 	fmt.Println("bello sniff [dir]")
 	fmt.Println("bello splain")
 }
@@ -317,6 +324,55 @@ func runBootstrap(root string) {
 		fail(err.Error())
 	}
 	fmt.Println("bello bootstrap: self-host validation complete")
+}
+
+func runCompletion(shell string) {
+	switch strings.ToLower(shell) {
+	case "bash", "sh", "":
+		fmt.Println(`# Install shell completion for bash:
+#   source <(bello completion)
+_bello_complete() {
+	local cur prev
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+	COMPREPLY=()
+	if [[ ${COMP_CWORD} -eq 1 ]]; then
+		COMPREPLY=( $(compgen -W "papala repl chiku construccion kanpai sniff bonito bootstrap boosta completion dame modulo splain" -- "$cur") )
+		return 0
+	fi
+	case "$prev" in
+		modulo)
+			COMPREPLY=( $(compgen -W "init" -- "$cur") )
+			return 0
+			;;
+		construccion|kanpai|sniff|bootstrap|boosta|completion|papala|bonito|dame)
+			COMPREPLY=( $(compgen -f -- "$cur") )
+			return 0
+			;;
+	esac
+	COMPREPLY=( $(compgen -f -- "$cur") )
+}
+complete -F _bello_complete bello` + "\n")
+		return
+	case "zsh":
+		fmt.Println(`# Install shell completion for zsh:
+#   autoload -Uz compinit && compinit
+#   source <(bello completion zsh)
+_bello() {
+  local -a cmds
+  cmds=("papala" "repl" "chiku" "construccion" "kanpai" "sniff" "bonito" "bootstrap" "boosta" "completion" "dame" "modulo" "splain")
+  _describe 'bello command' cmds
+}
+compdef _bello bello`)
+		return
+	case "fish":
+		fmt.Println(`# Install shell completion for fish:
+#   bello completion fish | source
+complete -c bello -n "__fish_use_subcommand" -a "papala repl chiku construccion kanpai sniff bonito bootstrap boosta completion dame modulo splain"`)
+		return
+	default:
+		fail("unsupported shell for completion: " + shell)
+	}
 }
 
 func locateBootstrapSeed(root string) (string, bool) {

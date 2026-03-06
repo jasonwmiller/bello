@@ -17,6 +17,7 @@ Bello is a Go-to-Go source-to-source transpiler. It parses Minion-speak `.🍌` 
 - `go run ./cmd/bello kanpai [dir]`
 - `go run ./cmd/bello sniff [dir]`
 - `go run ./cmd/bello bonito <file.🍌>`
+- `go run ./cmd/bello completion [bash|zsh|fish]`
 - `go run ./cmd/bello bootstrap .`
 - `go run ./cmd/bello modulo init <name>`
 - `go run ./cmd/bello dame <pkg>`
