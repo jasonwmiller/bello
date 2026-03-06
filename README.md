@@ -109,10 +109,14 @@ kill "$SERVER_PID"
 ```
 
 Supported commands:
+- `/chiku` — show prompt help (minion speak)
+- `/bapple` — leave REPL (alias: `return`)
+
+Legacy aliases still work for compatibility:
 - `/help` — show prompt help
 - `/quit`, `/exit` — leave REPL
 
-### Test package
+ ### Test package
 
 ```bash
  go run ./cmd/bello kanpai

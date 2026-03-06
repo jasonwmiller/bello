@@ -142,7 +142,7 @@ func runPapala(file string) {
 
 func runRepl() {
 	requireGoTool()
-	fmt.Println("bello repl — type /quit to exit")
+	fmt.Println("bello repl — use /chiku for help, /bapple to bounce")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -155,11 +155,11 @@ func runRepl() {
 			continue
 		}
 		switch strings.ToLower(line) {
-		case "/quit", "/exit":
+		case "/bapple", "/return", "/quit", "/exit":
 			return
-		case "/help":
-			fmt.Println("commands: /quit, /exit, /help")
-			fmt.Println("type a full Bello statement, or a full statement block for testing")
+		case "/chiku", "/help":
+			fmt.Println("bello commands: /chiku (help), /bapple (return)")
+			fmt.Println("type a full Bello statement, or a full statement block")
 			continue
 		}
 
