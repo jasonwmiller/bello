@@ -52,6 +52,12 @@ func main() {
 	}
 }
 
+func requireGoTool() {
+	if _, err := exec.LookPath("go"); err != nil {
+		fail("BEE DOH! -:1:1 — go tool not found in PATH")
+	}
+}
+
 func printUsage() {
 	fmt.Println("bello papala file.🍌")
 	fmt.Println("bello construccion [dir]")
@@ -78,6 +84,7 @@ func expectArgOrDot(i int) string {
 }
 
 func runPapala(file string) {
+	requireGoTool()
 	res, err := transpileSingle(file)
 	if err != nil {
 		fail(err.Error())
@@ -116,6 +123,7 @@ func runBonito(file string) {
 }
 
 func runProjectCommand(path string, action string) {
+	requireGoTool()
 	res, err := buildProjectFromBello(path)
 	if err != nil {
 		fail(err.Error())
@@ -138,6 +146,7 @@ func runProjectCommand(path string, action string) {
 }
 
 func runGoCommand(args ...string) {
+	requireGoTool()
 	cmd := exec.Command("go", args...)
 	var out strings.Builder
 	cmd.Stdout = &out
@@ -287,7 +296,7 @@ func parseGoToolError(output []byte, maps map[string]*transformer.PositionMap) (
 		return "BEE DOH! go command failed", 1
 	}
 
-	re := regexp.MustCompile(`(?m)^(.+\.go):([0-9]+):([0-9]+):(.*)$`)
+	re := regexp.MustCompile(`(?m)^(.+?\.go):([0-9]+):([0-9]+)(?::[0-9]+)?:\s*(.*)$`)
 	matches := re.FindAllStringSubmatch(txt, -1)
 	if len(matches) == 0 {
 		return "BEE DOH! " + txt, 1
