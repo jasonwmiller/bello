@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -19,6 +20,8 @@ type buildResult struct {
 	Workdir string
 	Maps    map[string]*transformer.PositionMap
 }
+
+var goBinary string
 
 func main() {
 	if len(os.Args) < 2 {
@@ -53,9 +56,36 @@ func main() {
 }
 
 func requireGoTool() {
-	if _, err := exec.LookPath("go"); err != nil {
-		fail("BEE DOH! -:1:1 — go tool not found in PATH")
+	bin := resolveGoBinary()
+	if err := exec.Command(bin, "version").Run(); err != nil {
+		var ee *exec.Error
+		if errors.As(err, &ee) && ee.Err == exec.ErrNotFound {
+			fail("BEE DOH! -:1:1 — go tool not found in PATH")
+		}
+		fail("BEE DOH! -:1:1 — go tool unavailable: " + err.Error())
 	}
+}
+
+func resolveGoBinary() string {
+	if goBinary != "" {
+		return goBinary
+	}
+	if v := strings.TrimSpace(os.Getenv("GO_BIN")); v != "" {
+		goBinary = v
+		return goBinary
+	}
+	if p, err := exec.LookPath("go"); err == nil {
+		goBinary = p
+		return goBinary
+	}
+	for _, p := range []string{"/usr/local/go/bin/go", "/usr/bin/go"} {
+		if _, err := os.Stat(p); err == nil {
+			goBinary = p
+			return goBinary
+		}
+	}
+	goBinary = "go"
+	return goBinary
 }
 
 func printUsage() {
@@ -91,7 +121,7 @@ func runPapala(file string) {
 	}
 	defer os.RemoveAll(res.Workdir)
 
-	cmd := exec.Command("go", "run", ".")
+	cmd := exec.Command(resolveGoBinary(), "run", ".")
 	cmd.Dir = res.Workdir
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -130,7 +160,7 @@ func runProjectCommand(path string, action string) {
 	}
 	defer os.RemoveAll(res.Workdir)
 
-	cmd := exec.Command("go", action, "./...")
+	cmd := exec.Command(resolveGoBinary(), action, "./...")
 	cmd.Dir = res.Workdir
 	var out strings.Builder
 	cmd.Stdout = &out
@@ -147,7 +177,7 @@ func runProjectCommand(path string, action string) {
 
 func runGoCommand(args ...string) {
 	requireGoTool()
-	cmd := exec.Command("go", args...)
+	cmd := exec.Command(resolveGoBinary(), args...)
 	var out strings.Builder
 	cmd.Stdout = &out
 	cmd.Stderr = &out

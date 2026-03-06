@@ -121,8 +121,43 @@ var keywordMap = map[string]string{
 	"pwede":     "new",
 }
 
+var predeclaredMap = map[string]string{
+	"me":      "int",
+	"me8":     "int8",
+	"me16":    "int16",
+	"me32":    "int32",
+	"me64":    "int64",
+	"ti":      "uint",
+	"ti8":     "uint8",
+	"ti16":    "uint16",
+	"ti32":    "uint32",
+	"ti64":    "uint64",
+	"la32":    "float32",
+	"la64":    "float64",
+	"butt":    "bool",
+	"bababa":  "string",
+	"todo":    "any",
+	"whaaat":  "error",
+	"si":      "true",
+	"naga":    "false",
+	"hana":    "nil",
+	"mamamia": "iota",
+	"baboi":   "append",
+	"para_tu": "len",
+	"stupa":   "cap",
+	"cierro":  "close",
+	"yeet":    "delete",
+	"mimik":   "copy",
+	"BEE_DOH": "panic",
+	"gelatin": "recover",
+	"poopaye": "println",
+}
+
 func translateLit(tok lexer.Token) string {
 	if repl, ok := keywordMap[tok.Lit]; ok {
+		return repl
+	}
+	if repl, ok := predeclaredMap[tok.Lit]; ok {
 		return repl
 	}
 	return tok.Lit
@@ -519,9 +554,7 @@ func toField(f *ast.Field, fset *token.FileSet) *Field {
 		Ellipsis: false,
 	}
 	if f.Tag != nil {
-		if lit, ok := f.Tag.(*ast.BasicLit); ok {
-			field.Tag = toBasicLit(lit, fset)
-		}
+		field.Tag = toBasicLit(f.Tag, fset)
 	}
 
 	switch t := f.Type.(type) {
@@ -591,7 +624,7 @@ func toExpr(e ast.Expr, fset *token.FileSet) Expr {
 			Low:      toExpr(x.Low, fset),
 			High:     toExpr(x.High, fset),
 			Max:      toExpr(x.Max, fset),
-			Full:     x.Full,
+			Full:     x.Slice3,
 		}
 	case *ast.SelectorExpr:
 		return &SelectorExpr{
@@ -623,14 +656,15 @@ func toExpr(e ast.Expr, fset *token.FileSet) Expr {
 	case *ast.ParenExpr:
 		return toExpr(x.X, fset)
 	case *ast.ArrayType:
+		if x.Len == nil {
+			return &SliceType{
+				BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
+				Elt:      toExpr(x.Elt, fset),
+			}
+		}
 		return &ArrayType{
 			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
 			Len:      toExpr(x.Len, fset),
-			Elt:      toExpr(x.Elt, fset),
-		}
-	case *ast.SliceType:
-		return &SliceType{
-			BaseNode: BaseNode{Posn: toPos(fset, x.Pos())},
 			Elt:      toExpr(x.Elt, fset),
 		}
 	case *ast.MapType:

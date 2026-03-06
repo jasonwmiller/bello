@@ -116,22 +116,22 @@ func Parse(path string) (*ModuleFile, error) {
 				continue
 			}
 			return nil, fmt.Errorf("invalid necesita directive at line %d", lineNo)
-		case "cambio":
-			if len(parts) == 1 {
-				mode = "cambio"
-				continue
-			}
-			if len(parts) == 2 && parts[1] == "(" {
-				mode = "cambio"
-				continue
-			}
-			rep := parseReplace(parts)
-			if rep != nil {
-				m.Replaces = append(m.Replaces, *rep)
-				continue
-			}
-			return nil, fmt.Errorf("invalid cambio directive at line %d", lineNo)
+	case "cambio":
+		if len(parts) == 1 {
+			mode = "cambio"
+			continue
 		}
+		if len(parts) == 2 && parts[1] == "(" {
+			mode = "cambio"
+			continue
+		}
+		rep := parseReplace(parts[1:])
+		if rep != nil {
+			m.Replaces = append(m.Replaces, *rep)
+			continue
+		}
+		return nil, fmt.Errorf("invalid cambio directive at line %d", lineNo)
+	}
 	}
 	if err := sc.Err(); err != nil {
 		return nil, err

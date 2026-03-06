@@ -15,7 +15,7 @@ func TestTransformRewritesMinionImportAndIdentifiers(t *testing.T) {
 muak "boca"
 
 banana jefe() {
-	poopaye("hello")
+	boca.blabla("hello")
 }`
 	p := parser.New(filepath.Join("..", "..", "testdata", "stdio_smoke.🍌"), src)
 	f, err := p.Parse()
@@ -43,7 +43,7 @@ banana jefe() {
 	callFound := false
 	ast.Inspect(gf, func(n ast.Node) bool {
 		if call, ok := n.(*ast.SelectorExpr); ok {
-			if call.Sel.Name == "Println" && call.X != nil {
+			if call.Sel.Name == "Printf" && call.X != nil {
 				callFound = true
 				return false
 			}
@@ -51,7 +51,7 @@ banana jefe() {
 		return true
 	})
 	if !callFound {
-		t.Fatalf("expected rewritten Println selector")
+		t.Fatalf("expected rewritten Printf selector")
 	}
 }
 

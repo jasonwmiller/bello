@@ -10,7 +10,7 @@ banana multiple(a me, b me) (me, me) {
 
 banana sum(nums ...me) me {
 	total := 0
-	para_tu i := 0; i < 10; i++ {
+	tulaliloo i := 0; i < para_tu(nums); i++ {
 		total = total + nums[i]
 	}
 	bapple total
