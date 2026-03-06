@@ -51,8 +51,8 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `examples/http_json.🍌`
 - `examples/generic_stack.🍌`
 - `examples/error_wrapping.🍌`
-- `examples/http3_server.🍌`
-- `examples/http3_client.🍌`
+- `examples/http3/http3_server.🍌`
+- `examples/http3/http3_client.🍌`
 
 Language reference: [LANGUAGE.md](/gfs/git/bello/LANGUAGE.md)
 LLM context file: [llms.txt](/gfs/git/bello/llms.txt)
@@ -69,6 +69,20 @@ LLM context file: [llms.txt](/gfs/git/bello/llms.txt)
 ```bash
 # translate + run
  go run ./cmd/bello papala path/to/file.🍌
+```
+
+### HTTP/3 one-shot demo
+
+```bash
+# Terminal 1: start banana server (runs forever)
+go run ./cmd/bello papala examples/http3/http3_server.🍌 > /tmp/bello_http3_server.log 2>&1 & \
+SERVER_PID=$!
+
+# Terminal 2: run banana client
+sleep 2
+go run ./cmd/bello construccion examples/http3/http3_client.🍌
+
+kill "$SERVER_PID"
 ```
 
 ### Build project
