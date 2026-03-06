@@ -578,7 +578,7 @@ banana prepareBootstrapWorkspace(root bababa) (bababa, whaaat) {
 		bapple workspace, hana
 	}
 
-	msg := "BEE DOH! -:1:1 — boosta seed missing. create bootstrap/src with Bello sources (cmd/bello/main.🍌 + pkg/**/*.🍌) and rerun."
+	msg := "BEE DOH! -:1:1 — boosta seed missing. create bootstrap/src with Bello sources (cmd/bello/jefe.🍌 + pkg/**/*.🍌) and rerun."
 	fmt.Println("bello boosta: failed to find bootstrap/src seed in", absRoot)
 	os.RemoveAll(workspace)
 	bapple "", fmt.Errorf(msg)
@@ -720,7 +720,7 @@ banana isBootstrapSeedDir(dir bababa) butt {
 	po _, err := os.Stat(filepath.Join(dir, "go.mod")); err != hana {
 		bapple naga
 	}
-	_, err := os.Stat(filepath.Join(dir, "cmd", "bello", "main.🍌"))
+	_, err := os.Stat(filepath.Join(dir, "cmd", "bello", "jefe.🍌"))
 	po err != hana {
 		bapple naga
 	}

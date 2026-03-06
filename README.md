@@ -177,7 +177,7 @@ export BELLO_SELF_HOST_BIN=$PWD/.bello/bello
 Seed layout:
 
 - `bootstrap/src/go.mod`
-- `bootstrap/src/cmd/bello/main.🍌`
+- `bootstrap/src/cmd/bello/jefe.🍌`
 - `bootstrap/src/pkg/...` translator packages
 
 To regenerate seed files manually:

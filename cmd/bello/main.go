@@ -579,7 +579,7 @@ func prepareBootstrapWorkspace(root string) (string, error) {
 		return workspace, nil
 	}
 
-	msg := "BEE DOH! -:1:1 — boosta seed missing. create bootstrap/src with Bello sources (cmd/bello/main.🍌 + pkg/**/*.🍌) and rerun."
+	msg := "BEE DOH! -:1:1 — boosta seed missing. create bootstrap/src with Bello sources (cmd/bello/jefe.🍌 + pkg/**/*.🍌) and rerun."
 	fmt.Println("bello boosta: failed to find bootstrap/src seed in", absRoot)
 	os.RemoveAll(workspace)
 	return "", fmt.Errorf(msg)
@@ -721,7 +721,7 @@ func isBootstrapSeedDir(dir string) bool {
 	if _, err := os.Stat(filepath.Join(dir, "go.mod")); err != nil {
 		return false
 	}
-	_, err := os.Stat(filepath.Join(dir, "cmd", "bello", "main.🍌"))
+	_, err := os.Stat(filepath.Join(dir, "cmd", "bello", "jefe.🍌"))
 	if err != nil {
 		return false
 	}

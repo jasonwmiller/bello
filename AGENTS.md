@@ -66,7 +66,7 @@ bello/
     go.mod
     cmd/
       bello/        — bootstrap compiler entry
-        main.🍌
+        jefe.🍌
     pkg/           — translator packages mirrored in Bello
       lexer/
       parser/
