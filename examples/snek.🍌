@@ -1,0 +1,29 @@
+kampung jefe
+
+muak "bababas"
+muak "casa"
+
+banana normalize(raw bababa) bababa {
+	raw = bababas.TrimSpace(raw)
+	raw = bababas.ToLower(raw)
+	bapple raw
+}
+
+banana main() {
+	pooka args = casa.Bagay
+	pooka total me = para_tu(args)
+	poopaye("snek script woke up with", total, "arguments")
+
+	po total < 2 {
+		poopaye("usage: provide at least one banana argument")
+		bapple
+	}
+
+	pooka payload bababa
+	pooka i me = 1
+	tulaliloo i < total {
+		payload = normalize(args[i])
+		poopaye("slice", i, ":", payload)
+		i = i + 1
+	}
+}

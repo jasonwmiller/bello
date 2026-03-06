@@ -96,7 +96,7 @@ func resolveGoBinary() string {
 }
 
 func printUsage() {
-	fmt.Println("bello papala file.🍌")
+	fmt.Println("bello papala file.🍌 [arg ...]")
 	fmt.Println("bello repl")
 	fmt.Println("bello chiku")
 	fmt.Println("bello construccion [dir]")
@@ -130,7 +130,12 @@ func runPapala(file string) {
 	}
 	defer os.RemoveAll(res.Workdir)
 
-	cmd := exec.Command(resolveGoBinary(), "run", ".")
+	args := []string{"run", "."}
+	if len(os.Args) > 3 {
+		args = append(args, os.Args[3:]...)
+	}
+
+	cmd := exec.Command(resolveGoBinary(), args...)
 	cmd.Dir = res.Workdir
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

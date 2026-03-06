@@ -103,15 +103,21 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - CLI module bootstrap now copies local `go.sum` alongside `go.mod` for project and single-file builds.
 - Fixtures: full fixture set has been added in `testdata`.
 - Example portfolio expanded with `agent`, `slackbot`, `webserver`, `grpc`, `tui`, `crypto`, and `banana_detector`; `stdlib`, `tui`, and `banana_detector` are currently corrected for compile-safe behavior.
+- HTTP/3 examples now include local module metadata in `examples/http3` so they build with `bello construccion`.
+- Added `snek.🍌` and documented its usage/output in README.
 - Docs: `README.md` added for setup, commands, and workflow notes.
 - Validation tests: lexer/parser/module/transformer tests pass in local environment.
 - Language docs and llms context files are now available (`LANGUAGE.md`, `llms.txt`).
 
 ### Open work before delivery
-- Finalize `.gitignore` enforcement for all working dirs and wire it into CI/repro checks.
-- Add CLI end-to-end command tests (`bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`) via fixture projects. (added; verify in CI)
+- Finalize `.gitignore` enforcement for all working dirs and wire it into CI/repro checks. *(partially complete; .gitignore exists and is being tracked)*
+- Add CLI end-to-end command tests (`bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`) via fixture projects. *(added and validated in local run)*
 - harden parser recovery and error messages to fully match BNF-level recovery requirements;
 - continue refining `bonito` formatting parity (spacing/comments and edge-case conversions) while keeping AST round-trip stable.
+
+### Delivery status
+- CLI commands currently verified: `bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`, `bello dame`, `bello modulo init`, and `bello splain`.
+- All `examples/*.🍌` and nested `examples/http3/*.🍌` build successfully with `bello construccion`.
 
 ## Completion criteria
 - All tests passing locally with fixtures and CLI commands exercised

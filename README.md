@@ -58,6 +58,7 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `examples/minion_guardian.🍌`
 - `examples/minion_mischief.🍌`
 - `examples/minion_vibes.🍌`
+- `examples/snek.🍌`
 - `examples/http3/http3_server.🍌`
 - `examples/http3/http3_client.🍌`
 
@@ -117,6 +118,20 @@ Supported commands:
 Legacy aliases still work for compatibility:
 - `/help` — show prompt help
 - `/quit`, `/exit` — leave REPL
+
+## Example: snek script
+
+```bash
+go run ./cmd/bello papala examples/snek.🍌 foo BAR baz
+```
+
+Expected output:
+```text
+snek script woke up with 4 arguments
+slice 1 : foo
+slice 2 : bar
+slice 3 : baz
+```
 
  ### Test package
 

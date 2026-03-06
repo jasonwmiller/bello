@@ -13,8 +13,8 @@ banana main() {
 	pooka body []ti8
 	pooka err whaaat
 
-	pooka tr *http3.RoundTripper
-	tr = &http3.RoundTripper{
+	pooka tr *http3.Transport
+	tr = &http3.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
