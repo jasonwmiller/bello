@@ -1,0 +1,33 @@
+kampung jefe
+
+muak "tic_toc"
+
+banana tickerBeat(tics chan bababa, stop chan me) {
+	pooka t *tic_toc.Ticker
+	t = tic_toc.NewTicker(1 * tic_toc.Tic)
+	defer t.Stop()
+
+	tulaliloo {
+		select {
+		doh <-t.C:
+			tics <- "bip"
+		doh <-stop:
+			poopaye("heartbeat: stop signal")
+			bapple
+		}
+	}
+}
+
+banana main() {
+	pooka tics chan bababa = dala(chan bababa, 6)
+	pooka stop chan me = dala(chan me, 1)
+	underpa tickerBeat(tics, stop)
+
+	pooka i me = 0
+	tulaliloo i < 3 {
+		poopaye("heartbeat:", <-tics)
+		i = i + 1
+	}
+	stop <- 1
+	poopaye("heartbeat: pause")
+}

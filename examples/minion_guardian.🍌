@@ -1,0 +1,33 @@
+kampung jefe
+
+muak "whaaats"
+
+banana sealToken(key bababa) (bababa, whaaat) {
+	poopaye("seal attempt:", key)
+	po key == "" {
+		bapple "", whaaats.uh_oh("no key in crate")
+	}
+	bapple "token://" + key, hana
+}
+
+banana pulse() {
+	defer func() {
+		pooka recovered any = gelatin()
+		po recovered == hana {
+			poopaye("guardian calm")
+			bapple
+		}
+		poopaye("guardian recovered:", recovered)
+	}()
+	BEE_DOH("boom")
+}
+
+banana main() {
+	pooka safe, err = sealToken("minion-core")
+	po err != hana {
+		poopaye("seal fail:", err)
+		bapple
+	}
+	poopaye("sealed:", safe)
+	pulse()
+}

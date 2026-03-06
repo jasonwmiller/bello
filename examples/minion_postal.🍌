@@ -1,0 +1,48 @@
+kampung jefe
+
+muak "amigos"
+muak "tic_toc"
+
+type Mission struct {
+	Code     bababa
+	Priority me
+}
+
+banana sorter(id bababa, inbox chan Mission, done chan bababa, wg *amigos.Chingus) {
+	defer wg.Wait()
+	tulaliloo m := tikali inbox {
+		tic_toc.zzzzz(tic_toc.Tic)
+		done <- id + " wrapped " + m.Code
+	}
+}
+
+banana main() {
+	pooka inbox chan Mission
+	pooka done chan bababa
+	pooka wg amigos.Chingus
+	inbox = dala(chan Mission, 4)
+	done = dala(chan bababa, 4)
+
+	wg.Add(2)
+	underpa sorter("meep-1", inbox, done, &wg)
+	underpa sorter("bop-2", inbox, done, &wg)
+
+	pooka missions = []Mission{
+		Mission{Code: "crate-shuffle", Priority: 9},
+		Mission{Code: "zip-boost", Priority: 3},
+		Mission{Code: "cable-loop", Priority: 7},
+		Mission{Code: "plop-repair", Priority: 5},
+	}
+
+	tulaliloo _, m := tikali missions {
+		poopaye("drop:", m.Code, "p=", m.Priority)
+		inbox <- m
+	}
+	cierro(inbox)
+	wg.Wait()
+
+	tulaliloo i := 0; i < para_tu(missions); i++ {
+		poopaye("delivery:", <-done)
+	}
+	poopaye("postal run done")
+}

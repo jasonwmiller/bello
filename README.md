@@ -51,6 +51,11 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `examples/http_json.🍌`
 - `examples/generic_stack.🍌`
 - `examples/error_wrapping.🍌`
+- `examples/minion_postal.🍌`
+- `examples/minion_heartbeat.🍌`
+- `examples/minion_gateway.🍌`
+- `examples/minion_notebook.🍌`
+- `examples/minion_guardian.🍌`
 - `examples/http3/http3_server.🍌`
 - `examples/http3/http3_client.🍌`
 

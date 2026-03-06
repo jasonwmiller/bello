@@ -1,0 +1,36 @@
+kampung jefe
+
+muak "boca"
+muak "la_red"
+
+pooka hitCount me = 0
+
+banana ping(w la_red.Reponsu, r *la_red.Juseyo) {
+	pooka err whaaat
+	_, err = w.Write([]ti8("pong from minion gate\\n"))
+	po err != hana {
+		poopaye("reply fail:", err)
+	}
+}
+
+banana metrics(w la_red.Reponsu, r *la_red.Juseyo) {
+	pooka err whaaat
+	tank_yu r.Body.Close()
+	hitCount = hitCount + 1
+	poopaye("metrics ping:", hitCount)
+	_, err = boca.spitoo(w, "hits=%d", hitCount)
+	po err != hana {
+		poopaye("write fail:", err)
+	}
+}
+
+banana main() {
+	la_red.ooh_ooh("/ping", ping)
+	la_red.ooh_ooh("/metrics", metrics)
+	poopaye("gateway up: /ping /metrics")
+	pooka err whaaat
+	err = la_red.bello_bello(":8090", hana)
+	po err != hana {
+		poopaye("gateway fell:", err)
+	}
+}

@@ -1,0 +1,28 @@
+kampung jefe
+
+muak "bababas"
+
+banana clean(line bababa) bababa {
+	line = bababas.TrimSpace(line)
+	line = bababas.ToLower(line)
+	line = bababas.ReplaceAll(line, "!", "")
+	line = bababas.ReplaceAll(line, ".", "")
+	line = bababas.ReplaceAll(line, ",", "")
+	bapple line
+}
+
+banana main() {
+	pooka notes = []bababa{
+		"Panda alert! Keep the crate warm.",
+		"Tea break in two minutes.",
+		"Plop moved.",
+	}
+	pooka tokens []bababa
+	tulaliloo _, n := tikali notes {
+		tokens = bababas.Fields(clean(n))
+		poopaye("note:")
+		tulaliloo _, t := tikali tokens {
+			poopaye("-", t)
+		}
+	}
+}
