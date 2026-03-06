@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -33,6 +35,8 @@ func main() {
 	switch os.Args[1] {
 	case "papala":
 		runPapala(expectArg("papala"))
+	case "repl":
+		runRepl()
 	case "construccion":
 		runProjectCommand(expectArgOrDot(2), "build")
 	case "kanpai":
@@ -91,6 +95,7 @@ func resolveGoBinary() string {
 
 func printUsage() {
 	fmt.Println("bello papala file.🍌")
+	fmt.Println("bello repl")
 	fmt.Println("bello construccion [dir]")
 	fmt.Println("bello kanpai [dir]")
 	fmt.Println("bello bonito file.🍌")
@@ -127,12 +132,79 @@ func runPapala(file string) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	var stderr strings.Builder
-	cmd.Stderr = &stderr
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
 	err = cmd.Run()
 	if err != nil {
 		msg, n := parseGoToolError([]byte(stderr.String()), res.Maps)
 		failWithSummary(msg, n)
 	}
+}
+
+func runRepl() {
+	requireGoTool()
+	fmt.Println("bello repl — type /quit to exit")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		fmt.Print("🍌> ")
+		if !scanner.Scan() {
+			return
+		}
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		switch strings.ToLower(line) {
+		case "/quit", "/exit":
+			return
+		case "/help":
+			fmt.Println("commands: /quit, /exit, /help")
+			fmt.Println("type a full Bello statement, or a full statement block for testing")
+			continue
+		}
+
+		if err := runReplLine(line); err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+func runReplLine(line string) error {
+	replSrc := "kampung jefe\n\nbanana main() {\n\t" + line + "\n}\n"
+	tempFile, err := os.CreateTemp("", "bello-repl-*.🍌")
+	if err != nil {
+		return fmt.Errorf("BEE DOH! -:1:1 — cannot create repl file: %v", err)
+	}
+	path := tempFile.Name()
+	if _, err := tempFile.WriteString(replSrc); err != nil {
+		tempFile.Close()
+		os.Remove(path)
+		return fmt.Errorf("BEE DOH! -:1:1 — cannot write repl file: %v", err)
+	}
+	tempFile.Close()
+	defer os.Remove(path)
+
+	res, err := transpileSingle(path)
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(res.Workdir)
+
+	cmd := exec.Command(resolveGoBinary(), "run", ".")
+	cmd.Dir = res.Workdir
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	var stderr strings.Builder
+	cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
+	err = cmd.Run()
+	if err != nil {
+		msg, n := parseGoToolError([]byte(stderr.String()), res.Maps)
+		if n > 0 {
+			return fmt.Errorf("POOPAYE! compilation naga success. %d whaaat found.\n%s", n, msg)
+		}
+		return fmt.Errorf(msg)
+	}
+	return nil
 }
 
 func runBonito(file string) {

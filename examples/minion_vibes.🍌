@@ -1,0 +1,54 @@
+kampung jefe
+
+muak "bababas"
+
+luk Scream kampai {
+	Tag  bababa
+	Shout bababa
+}
+
+banana scrub(raw bababa) bababa {
+	raw = bababas.TrimSpace(raw)
+	raw = bababas.ToLower(raw)
+	raw = bababas.ReplaceAll(raw, "!", "")
+	raw = bababas.ReplaceAll(raw, "  ", " ")
+	bapple raw
+}
+
+banana vibeRank(loud me) bababa {
+	bee {
+	doh loud < 4:
+		bapple "pip"
+	doh loud < 8:
+		bapple "pow"
+	meh:
+		bapple "boom"
+	}
+}
+
+banana tally(lines []bababa) papoy[bababa]me {
+	pooka result = dala(papoy[bababa]me)
+	tulaliloo _, line := tikali lines {
+		pooka clean bababa = scrub(line)
+		pooka words []bababa = bababas.Fields(clean)
+		tulaliloo _, token := tikali words {
+			pooka curr me = result[token]
+			curr = curr + 1
+			result[token] = curr
+		}
+	}
+	bapple result
+}
+
+banana main() {
+	pooka logs = []bababa{
+		"BANANA BOOM! banana BANANA",
+		"woopity boopity no banana",
+		"meep banana pow",
+	}
+
+	pooka scoreBoard = tally(logs)
+	tulaliloo token, n := tikali scoreBoard {
+		poopaye(token, "→", n, "=", vibeRank(n))
+	}
+}

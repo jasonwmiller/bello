@@ -1,0 +1,37 @@
+kampung jefe
+
+luk Minion kampai {
+	Name  bababa
+	Chaos bababa
+	Vibes me
+}
+
+banana (m *Minion) mood() bababa {
+	bee {
+	doh m.Vibes < 2:
+		bapple "wee-woo"
+	doh m.Vibes < 6:
+		bapple "chiki-chaka"
+	meh:
+		bapple "tata-banana"
+	}
+}
+
+banana shout(m Minion) {
+	poopaye(m.Name + " :: " + m.Chaos + " :: " + m.mood())
+}
+
+banana main() {
+	pooka crew = []Minion{
+		{Name: "Dopo", Chaos: "spark", Vibes: 1},
+		{Name: "Tullo", Chaos: "wobble", Vibes: 4},
+		{Name: "Poki", Chaos: "boom", Vibes: 9},
+	}
+	tulaliloo _, m := tikali crew {
+		shout(m)
+	}
+
+	pooka top bababa
+	top = "all is giga"
+	poopaye("final shout:", top)
+}

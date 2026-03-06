@@ -56,6 +56,8 @@ It takes `.🍌` source files, parses them through a Go-backed flow, transforms 
 - `examples/minion_gateway.🍌`
 - `examples/minion_notebook.🍌`
 - `examples/minion_guardian.🍌`
+- `examples/minion_mischief.🍌`
+- `examples/minion_vibes.🍌`
 - `examples/http3/http3_server.🍌`
 - `examples/http3/http3_client.🍌`
 
@@ -98,6 +100,17 @@ kill "$SERVER_PID"
 # or explicit path
  go run ./cmd/bello construccion ./some/dir
 ```
+
+### REPL
+
+```bash
+# start a simple prompt
+ go run ./cmd/bello repl
+```
+
+Supported commands:
+- `/help` — show prompt help
+- `/quit`, `/exit` — leave REPL
 
 ### Test package
 
