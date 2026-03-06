@@ -1,0 +1,15 @@
+kampung jefe
+
+muak "amigos"
+
+banana worker(jobs chan me, results chan me, wg *amigos.WaitGroup) {
+	go func() {
+		wg.Add(1)
+		jobs <- 1
+		results <- 1
+	}()
+}
+
+banana main() {
+	poopaye("worker")
+}

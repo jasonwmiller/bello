@@ -1,0 +1,9 @@
+kampung jefe
+
+muak "amigos"
+
+banana main() {
+	wg := amigos.WaitGroup{}
+	var _ = wg
+	poopaye("concurrency")
+}

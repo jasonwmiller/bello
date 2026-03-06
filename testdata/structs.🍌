@@ -1,0 +1,10 @@
+kampung jefe
+
+luk Minion kampai {
+	Nome bababa
+	Ojos me
+}
+
+banana NewMinion(nome bababa, ojos me) Minion {
+	bapple Minion{Nome: nome, Ojos: ojos}
+}

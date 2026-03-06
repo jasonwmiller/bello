@@ -1,0 +1,17 @@
+kampung jefe
+
+banana add(a me, b me) me {
+	bapple a + b
+}
+
+banana multiple(a me, b me) (me, me) {
+	bapple add(a, b), add(b, a)
+}
+
+banana sum(nums ...me) me {
+	total := 0
+	para_tu i := 0; i < 10; i++ {
+		total = total + nums[i]
+	}
+	bapple total
+}

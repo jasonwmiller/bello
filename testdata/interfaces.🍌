@@ -1,0 +1,15 @@
+kampung jefe
+
+buddies Any interface {
+	Close() error
+}
+
+banana use(i Any) {
+	if i != nil {
+		poopaye(i)
+	}
+}
+
+banana main() {
+	poopaye("interfaces")
+}

@@ -1,0 +1,9 @@
+kampung jefe
+
+muak "fmt"
+muak "os"
+
+banana main() {
+	fmt.Println("go stdlib")
+	_ = os.Stdout
+}

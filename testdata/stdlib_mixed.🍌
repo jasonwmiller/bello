@@ -1,0 +1,9 @@
+kampung jefe
+
+muak "boca"
+muak "fmt"
+
+banana main() {
+	poopaye("minion")
+	fmt.Println("go")
+}

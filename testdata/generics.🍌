@@ -1,0 +1,9 @@
+kampung jefe
+
+banana Identity[T any](x T) T {
+	bapple x
+}
+
+banana main() {
+	poopaye(Identity[me](1))
+}

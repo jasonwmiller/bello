@@ -1,0 +1,578 @@
+(* ================================================================ *)
+(* Bello Language Grammar — EBNF                                    *)
+(* Version 0.1.0                                                    *)
+(* Go semantics, Minion-speak syntax                                *)
+(*                                                                  *)
+(* Implementation-ready: includes operator precedence, keyword       *)
+(* table, disambiguation rules, and lexer specifications.           *)
+(* ================================================================ *)
+
+(* ---------------------------------------------------------------- *)
+(* 1. Source File                                                    *)
+(* ---------------------------------------------------------------- *)
+
+SourceFile      = PackageClause ";" { ImportDecl ";" } { TopLevelDecl ";" } ;
+
+PackageClause   = "kampung" PackageName ;
+PackageName     = identifier ;
+
+(* ---------------------------------------------------------------- *)
+(* 2. Imports                                                        *)
+(* ---------------------------------------------------------------- *)
+
+ImportDecl      = "muak" ( ImportSpec | "(" { ImportSpec ";" } ")" ) ;
+ImportSpec      = [ "." | "_" | PackageName ] ImportPath ;
+ImportPath      = string_lit ;
+
+(* ---------------------------------------------------------------- *)
+(* 3. Declarations                                                   *)
+(* ---------------------------------------------------------------- *)
+
+TopLevelDecl    = Declaration | FunctionDecl | MethodDecl ;
+
+Declaration     = VarDecl | ConstDecl | TypeDecl ;
+
+(* --- Variables --- *)
+
+VarDecl         = "pooka" ( VarSpec | "(" { VarSpec ";" } ")" ) ;
+VarSpec         = IdentifierList ( Type [ "=" ExpressionList ]
+                                 | "=" ExpressionList ) ;
+
+ShortVarDecl    = IdentifierList ":=" ExpressionList ;
+
+(* --- Constants --- *)
+
+ConstDecl       = "gelato" ( ConstSpec | "(" { ConstSpec ";" } ")" ) ;
+ConstSpec       = IdentifierList [ [ Type ] "=" ExpressionList ] ;
+
+(* --- Types --- *)
+
+TypeDecl        = "luk" ( TypeSpec | "(" { TypeSpec ";" } ")" ) ;
+TypeSpec        = identifier [ TypeParameters ] Type ;
+
+(* ---------------------------------------------------------------- *)
+(* 4. Types                                                          *)
+(* ---------------------------------------------------------------- *)
+
+Type            = TypeName [ TypeArguments ]
+                | TypeLit
+                | "(" Type ")" ;
+
+TypeName        = identifier | QualifiedIdent ;
+
+TypeLit         = ArrayType
+                | SliceType
+                | MapType
+                | ChannelType
+                | PointerType
+                | FunctionType
+                | StructType
+                | InterfaceType ;
+
+(* --- Primitive Types --- *)
+(* Built-in type names (predeclared, resolved as identifiers):
+     me   me8   me16   me32   me64         — signed integers
+     ti   ti8   ti16   ti32   ti64         — unsigned integers
+     la32  la64                            — floats
+     butt                                  — boolean
+     bababa                                — string
+     todo                                  — any / interface{}
+     whaaat                                — error interface
+*)
+
+(* --- Composite Types --- *)
+
+ArrayType       = "[" Expression "]" Type ;
+SliceType       = "[" "]" Type ;
+
+MapType         = "papoy" "[" Type "]" Type ;
+
+ChannelType     = ChanType Type ;
+ChanType        = "tatata"
+                | "tatata" "<-"
+                | "<-" "tatata" ;
+
+PointerType     = "*" Type ;
+
+FunctionType    = "banana" Signature ;
+
+(* --- Struct --- *)
+
+StructType      = "kampai" "{" { FieldDecl ";" } "}" ;
+FieldDecl       = ( IdentifierList Type | EmbeddedField ) [ Tag ] ;
+EmbeddedField   = [ "*" ] TypeName [ TypeArguments ] ;
+Tag             = string_lit ;
+
+(* --- Interface --- *)
+
+InterfaceType   = "buddies" "{" { InterfaceElem ";" } "}" ;
+InterfaceElem   = MethodElem | TypeElem ;
+MethodElem      = MethodName Signature ;
+TypeElem        = TypeTerm { "|" TypeTerm } ;
+TypeTerm        = [ "~" ] Type ;
+
+(* ---------------------------------------------------------------- *)
+(* 5. Generics                                                       *)
+(* ---------------------------------------------------------------- *)
+
+TypeParameters  = "[" TypeParamList "]" ;
+TypeParamList   = TypeParamDecl { "," TypeParamDecl } ;
+TypeParamDecl   = IdentifierList TypeConstraint ;
+TypeConstraint  = TypeElem ;
+
+TypeArguments   = "[" TypeList [ "," ] "]" ;
+TypeList        = Type { "," Type } ;
+
+(* ---------------------------------------------------------------- *)
+(* 6. Functions & Methods                                            *)
+(* ---------------------------------------------------------------- *)
+
+FunctionDecl    = "banana" FunctionName [ TypeParameters ] Signature [ FunctionBody ] ;
+FunctionName    = identifier ;
+
+MethodDecl      = "banana" Receiver MethodName [ TypeParameters ] Signature [ FunctionBody ] ;
+Receiver        = "(" [ identifier ] [ "*" ] TypeName [ TypeArguments ] ")" ;
+
+Signature       = Parameters [ Result ] ;
+Parameters      = "(" [ ParameterList [ "," ] ] ")" ;
+ParameterList   = ParameterDecl { "," ParameterDecl } ;
+ParameterDecl   = [ IdentifierList ] [ "..." ] Type ;
+
+Result          = Parameters | Type ;
+
+FunctionBody    = Block ;
+
+(* ---------------------------------------------------------------- *)
+(* 7. Statements                                                     *)
+(* ---------------------------------------------------------------- *)
+
+Statement       = Declaration
+                | SimpleStmt
+                | ReturnStmt
+                | BreakStmt
+                | ContinueStmt
+                | GotoStmt
+                | FallthroughStmt
+                | Block
+                | IfStmt
+                | ForStmt
+                | SwitchStmt
+                | TypeSwitchStmt
+                | SelectStmt
+                | GoStmt
+                | DeferStmt
+                | LabeledStmt ;
+
+SimpleStmt      = EmptyStmt
+                | ExpressionStmt
+                | SendStmt
+                | IncDecStmt
+                | Assignment
+                | ShortVarDecl ;
+
+EmptyStmt       = ;
+
+(* --- Labeled --- *)
+
+LabeledStmt     = Label ":" Statement ;
+Label           = identifier ;
+
+(* --- Return --- *)
+
+ReturnStmt      = "bapple" [ ExpressionList ] ;
+
+(* --- Break / Continue --- *)
+
+BreakStmt       = "buttom" [ Label ] ;
+ContinueStmt    = "bajo" [ Label ] ;
+
+(* --- Goto --- *)
+
+GotoStmt        = "waaah" Label ;
+
+(* --- Fallthrough --- *)
+
+FallthroughStmt = "patalaki" ;
+
+(* --- Block --- *)
+
+Block           = "{" StatementList "}" ;
+StatementList   = { Statement ";" } ;
+
+(* --- Expression Statement --- *)
+
+ExpressionStmt  = Expression ;
+
+(* --- Send --- *)
+
+SendStmt        = Channel "<-" Expression ;
+Channel         = Expression ;
+
+(* --- Inc / Dec --- *)
+
+IncDecStmt      = Expression ( "++" | "--" ) ;
+
+(* --- Assignment --- *)
+
+Assignment      = ExpressionList assign_op ExpressionList ;
+assign_op       = [ add_op | mul_op ] "=" ;
+
+(* --- If --- *)
+
+IfStmt          = "po" [ SimpleStmt ";" ] Expression Block
+                  [ "ka" ( IfStmt | Block ) ] ;
+
+(* --- For --- *)
+
+ForStmt         = "tulaliloo" [ ForCondition | ForClause | RangeClause ] Block ;
+ForCondition    = Expression ;
+ForClause       = [ SimpleStmt ] ";" [ Expression ] ";" [ SimpleStmt ] ;
+RangeClause     = [ ExpressionList "=" | IdentifierList ":=" ] "tikali" Expression ;
+
+(* DISAMBIGUATION: ForCondition vs ForClause
+   If the parser sees a SimpleStmt followed by ";", it is a ForClause.
+   A bare Expression with no ";" is a ForCondition (while-style).
+   No semicolons at all = infinite loop. *)
+
+(* --- Switch --- *)
+
+SwitchStmt      = "bee" [ SimpleStmt ";" ] [ Expression ] "{" { ExprSwitchCase } "}" ;
+ExprSwitchCase  = ( "doh" ExpressionList | "meh" ) ":" StatementList ;
+
+(* --- Type Switch --- *)
+
+TypeSwitchStmt  = "bee" [ SimpleStmt ";" ] TypeSwitchGuard "{" { TypeSwitchCase } "}" ;
+TypeSwitchGuard = [ identifier ":=" ] PrimaryExpr "." "(" "luk" ")" ;
+TypeSwitchCase  = ( "doh" TypeList | "meh" ) ":" StatementList ;
+
+(* DISAMBIGUATION: SwitchStmt vs TypeSwitchStmt
+   Both begin with "bee". The parser must look ahead for the
+   TypeSwitchGuard pattern: <expr>.(luk). Specifically:
+     - If the tokens after "bee" [SimpleStmt ";"] contain
+       "." "(" "luk" ")" before the opening "{", it is a TypeSwitchStmt.
+     - Otherwise, it is a SwitchStmt.
+   In practice, parse as SwitchStmt and backtrack if the guard pattern
+   is found, or use a two-pass lookahead before committing. *)
+
+(* --- Select --- *)
+
+SelectStmt      = "culo" "{" { SelectCase } "}" ;
+SelectCase      = ( "doh" ( SendStmt | RecvStmt ) | "meh" ) ":" StatementList ;
+RecvStmt        = [ ExpressionList "=" | IdentifierList ":=" ] RecvExpr ;
+RecvExpr        = Expression ;
+
+(* --- Go --- *)
+
+GoStmt          = "underpa" Expression ;
+
+(* --- Defer --- *)
+
+DeferStmt       = "tank_yu" Expression ;
+
+(* ---------------------------------------------------------------- *)
+(* 8. Expressions — Precedence Climbing                              *)
+(* ---------------------------------------------------------------- *)
+
+(* Bello uses Go's 5 precedence levels (1 = lowest, 5 = highest).
+   This section replaces the ambiguous "Expression binary_op Expression"
+   with an unambiguous precedence grammar suitable for recursive descent. *)
+
+Expression      = LogicalOrExpr ;
+
+LogicalOrExpr   = LogicalAndExpr { "||" LogicalAndExpr } ;          (* prec 1 *)
+LogicalAndExpr  = ComparisonExpr { "&&" ComparisonExpr } ;          (* prec 2 *)
+ComparisonExpr  = AdditionExpr [ rel_op AdditionExpr ] ;            (* prec 3, non-associative *)
+AdditionExpr    = MultiplyExpr { add_op MultiplyExpr } ;            (* prec 4 *)
+MultiplyExpr    = UnaryExpr { mul_op UnaryExpr } ;                  (* prec 5 *)
+
+UnaryExpr       = PrimaryExpr
+                | unary_op UnaryExpr ;
+
+PrimaryExpr     = Operand
+                | PrimaryExpr Selector
+                | PrimaryExpr Index
+                | PrimaryExpr Slice
+                | PrimaryExpr TypeAssertion
+                | PrimaryExpr Arguments ;
+
+Operand         = Literal
+                | OperandName [ TypeArguments ]
+                | "(" Expression ")" ;
+
+OperandName     = identifier | QualifiedIdent ;
+
+Literal         = BasicLit | CompositeLit | FunctionLit ;
+
+BasicLit        = int_lit | float_lit | imaginary_lit
+                | rune_lit | string_lit ;
+
+CompositeLit    = LiteralType LiteralValue ;
+LiteralType     = StructType | ArrayType | SliceType | MapType
+                | "[" "..." "]" Type
+                | TypeName [ TypeArguments ] ;
+LiteralValue    = "{" [ ElementList [ "," ] ] "}" ;
+ElementList     = KeyedElement { "," KeyedElement } ;
+KeyedElement    = [ Key ":" ] Element ;
+Key             = FieldName | Expression | LiteralValue ;
+FieldName       = identifier ;
+Element         = Expression | LiteralValue ;
+
+(* DISAMBIGUATION: Composite Literal Ambiguity
+   In "po", "tulaliloo", "bee", and "culo" statements, a "{" after an
+   expression is always parsed as the start of a block, NOT as a
+   composite literal. To use a composite literal in these contexts,
+   wrap it in parentheses:
+       po (Minion{Ojos: 2}).Ojos > 1 { ... }    — correct
+       po Minion{Ojos: 2}.Ojos > 1 { ... }      — parse error
+   This matches Go's rule exactly. *)
+
+FunctionLit     = "banana" Signature FunctionBody ;
+
+Selector        = "." identifier ;
+Index           = "[" Expression "]" ;
+Slice           = "[" [ Expression ] ":" [ Expression ] "]"
+                | "[" [ Expression ] ":" Expression ":" Expression "]" ;
+TypeAssertion   = "." "(" Type ")" ;
+Arguments       = "(" [ ( ExpressionList | Type [ "," ExpressionList ] ) [ "..." ] [ "," ] ] ")" ;
+
+QualifiedIdent  = PackageName "." identifier ;
+
+(* ---------------------------------------------------------------- *)
+(* 9. Operators                                                      *)
+(* ---------------------------------------------------------------- *)
+
+(* Precedence (highest to lowest):
+     5  *  /  %  <<  >>  &  &^          mul_op
+     4  +  -  |  ^                      add_op
+     3  ==  !=  <  <=  >  >=            rel_op  (non-associative)
+     2  &&                              logical AND
+     1  ||                              logical OR
+*)
+
+rel_op          = "==" | "!=" | "<" | "<=" | ">" | ">=" ;
+add_op          = "+" | "-" | "|" | "^" ;
+mul_op          = "*" | "/" | "%" | "<<" | ">>" | "&" | "&^" ;
+unary_op        = "+" | "-" | "!" | "^" | "*" | "&" | "<-" ;
+
+(* ---------------------------------------------------------------- *)
+(* 10. Built-in Functions                                            *)
+(* ---------------------------------------------------------------- *)
+
+(* Built-in functions are predeclared identifiers. They are called
+   with standard call syntax via the Arguments production.
+
+   SPECIAL PARSING: dala and pwede take a Type as their first argument,
+   not an Expression. The Arguments production handles this via its
+   "Type [ ',' ExpressionList ]" alternative. When the parser sees
+   dala(...) or pwede(...), it MUST attempt to parse the first argument
+   as a Type before falling back to Expression.
+
+   Specifically:
+     dala(tatata me)          — first arg is ChannelType "tatata me"
+     dala(tatata me, 10)      — first arg is Type, second is Expression
+     dala([]me, 0, 10)        — first arg is SliceType
+     dala(papoy[bababa]me)    — first arg is MapType
+     pwede(Minion)            — first arg is TypeName
+
+   All other builtins take only Expressions:
+
+     baboi(slice, elem)       — append
+     para_tu(collection)      — len
+     stupa(collection)        — cap
+     cierro(channel)          — close
+     yeet(myPapoy, key)       — delete
+     mimik(dst, src)          — copy
+     BEE_DOH(value)           — panic
+     gelatin()                — recover
+     poopaye(args...)         — println (variadic)
+*)
+
+(* ---------------------------------------------------------------- *)
+(* 11. Built-in Constants & Zero Values                              *)
+(* ---------------------------------------------------------------- *)
+
+(* Predeclared constants (resolved as identifiers by the parser):
+     si       — true   (butt)
+     naga     — false  (butt)
+     hana     — nil    (pointers, slices, papoy, tatata, buddies, banana)
+     mamamia  — iota   (gelato blocks only)
+*)
+
+(* ---------------------------------------------------------------- *)
+(* 12. Lexical Elements                                              *)
+(* ---------------------------------------------------------------- *)
+
+(* --- Whitespace --- *)
+
+(* Whitespace characters (space U+0020, horizontal tab U+0009,
+   carriage return U+000D, newline U+000A) are ignored except as
+   they separate tokens that would otherwise combine into a single
+   token. Newlines are significant for semicolon insertion (see below). *)
+
+(* --- Comments --- *)
+
+(* Comments act as whitespace.
+     line_comment  = "//" { unicode_char } newline ;
+     block_comment = "/*" { unicode_char | newline } "*/" ;
+   Block comments cannot nest. *)
+
+(* --- Identifiers --- *)
+
+identifier      = letter { letter | unicode_digit } ;
+letter          = unicode_letter | "_" ;
+
+(* --- Keywords --- *)
+
+(* The following tokens are reserved keywords. The lexer must match
+   these BEFORE attempting to match a generic identifier.
+
+   kampung   muak      banana    bapple    pooka     gelato
+   luk       kampai    buddies   papoy     po        ka
+   tulaliloo tikali    buttom    bajo      bee       doh
+   meh       underpa   tatata    culo      tank_yu   patalaki
+   waaah     dala      pwede
+
+   Note: "dala" and "pwede" are keywords because they require special
+   Type-as-first-argument parsing. All other builtins (baboi, para_tu,
+   stupa, cierro, yeet, mimik, BEE_DOH, gelatin, poopaye) are
+   predeclared identifiers, NOT keywords — they can be shadowed by
+   user declarations (as in Go).
+
+   The following are predeclared identifiers (NOT keywords):
+     Types:    me me8 me16 me32 me64 ti ti8 ti16 ti32 ti64
+               la32 la64 butt bababa todo whaaat
+     Constants: si naga hana mamamia
+     Functions: baboi para_tu stupa cierro yeet mimik
+                BEE_DOH gelatin poopaye
+*)
+
+(* --- Integer Literals --- *)
+
+int_lit         = decimal_lit | binary_lit | octal_lit | hex_lit ;
+decimal_lit     = "0" | ( "1" ... "9" ) [ [ "_" ] decimal_digits ] ;
+binary_lit      = "0" ( "b" | "B" ) [ "_" ] binary_digits ;
+octal_lit       = "0" ( "o" | "O" ) [ "_" ] octal_digits ;
+hex_lit         = "0" ( "x" | "X" ) [ "_" ] hex_digits ;
+
+decimal_digits  = decimal_digit { [ "_" ] decimal_digit } ;
+binary_digits   = binary_digit { [ "_" ] binary_digit } ;
+octal_digits    = octal_digit { [ "_" ] octal_digit } ;
+hex_digits      = hex_digit { [ "_" ] hex_digit } ;
+
+(* --- Float Literals --- *)
+
+float_lit       = decimal_float_lit | hex_float_lit ;
+
+decimal_float_lit = decimal_digits "." [ decimal_digits ] [ decimal_exponent ]
+                  | decimal_digits decimal_exponent
+                  | "." decimal_digits [ decimal_exponent ] ;
+decimal_exponent  = ( "e" | "E" ) [ "+" | "-" ] decimal_digits ;
+
+hex_float_lit   = "0" ( "x" | "X" ) hex_mantissa hex_exponent ;
+hex_mantissa    = [ "_" ] hex_digits "." [ hex_digits ]
+                | [ "_" ] hex_digits
+                | "." hex_digits ;
+hex_exponent    = ( "p" | "P" ) [ "+" | "-" ] decimal_digits ;
+
+(* --- Imaginary Literals --- *)
+
+imaginary_lit   = ( decimal_digits | int_lit | float_lit ) "i" ;
+
+(* --- Rune Literals --- *)
+
+rune_lit        = "'" ( unicode_value | byte_value ) "'" ;
+unicode_value   = unicode_char | little_u_value | big_u_value | escaped_char ;
+byte_value      = octal_byte_value | hex_byte_value ;
+octal_byte_value = "\\" octal_digit octal_digit octal_digit ;
+hex_byte_value  = "\\x" hex_digit hex_digit ;
+little_u_value  = "\\u" hex_digit hex_digit hex_digit hex_digit ;
+big_u_value     = "\\U" hex_digit hex_digit hex_digit hex_digit
+                        hex_digit hex_digit hex_digit hex_digit ;
+escaped_char    = "\\" ( "a" | "b" | "f" | "n" | "r" | "t" | "v" | "\\" | "'" | "\"" ) ;
+
+(* --- String Literals --- *)
+
+string_lit      = raw_string_lit | interpreted_string_lit ;
+raw_string_lit  = "`" { unicode_char | newline } "`" ;
+interpreted_string_lit = "\"" { unicode_value | byte_value } "\"" ;
+
+(* --- Character Classes --- *)
+
+unicode_char    = (* any Unicode code point except newline *) ;
+unicode_letter  = (* Unicode categories Lu, Ll, Lt, Lm, Lo *) ;
+unicode_digit   = (* Unicode category Nd *) ;
+decimal_digit   = "0" ... "9" ;
+binary_digit    = "0" | "1" ;
+octal_digit     = "0" ... "7" ;
+hex_digit       = "0" ... "9" | "A" ... "F" | "a" ... "f" ;
+newline         = (* U+000A *) ;
+
+(* --- Semicolons --- *)
+
+(* Semicolons are implicit. The lexer inserts a ";" after a line's
+   final token if that token is one of:
+     - an identifier (including predeclared ones)
+     - a literal (int_lit, float_lit, imaginary_lit, rune_lit, string_lit)
+     - one of the keywords: buttom  bajo  bapple  patalaki
+     - one of the punctuation: ++  --  )  }  ]
+   This is identical to Go's semicolon insertion rule with Bello keywords
+   substituted. The parser grammar uses ";" to represent these points. *)
+
+(* --- Token Boundaries --- *)
+
+(* The lexer is greedy: it always consumes the longest possible token.
+   When two keywords or identifiers would merge (e.g., "pobob" should
+   be identifier "pobob", not keyword "po" + identifier "bob"), the
+   longest match wins.
+
+   Operator tokens are also greedy:
+     "<-"  is one token (channel receive/send), not "<" then "-"
+     "&&"  is one token, not "&" then "&"
+     "&^"  is one token (bit clear), not "&" then "^"
+     "<<=" is one token (shift-assign), not "<<" then "="
+*)
+
+(* ---------------------------------------------------------------- *)
+(* 13. Miscellaneous                                                 *)
+(* ---------------------------------------------------------------- *)
+
+IdentifierList  = identifier { "," identifier } ;
+ExpressionList  = Expression { "," Expression } ;
+MethodName      = identifier ;
+
+(* ---------------------------------------------------------------- *)
+(* 14. Module File Grammar (bello.peach)                             *)
+(* ---------------------------------------------------------------- *)
+
+(* The module file (bello.🍑) uses a separate, line-oriented grammar.
+   It does NOT use the semicolon insertion rules above — newlines are
+   the statement terminators. *)
+
+ModuleFile      = ModuleDirective newline
+                  BelloDirective newline
+                  { ModuleStmt newline } ;
+
+ModuleDirective = "modulo" ModulePath ;
+BelloDirective  = "bello" BelloVersion ;
+
+ModuleStmt      = RequireDirective | ReplaceDirective ;
+
+RequireDirective = "necesita" ( RequireSpec | "(" newline { RequireSpec newline } ")" ) ;
+RequireSpec     = ModulePath Version ;
+
+ReplaceDirective = "cambio" ( ReplaceSpec | "(" newline { ReplaceSpec newline } ")" ) ;
+ReplaceSpec     = ModulePath [ Version ] "=>" ModulePath Version ;
+
+ModulePath      = module_path_chars ;
+BelloVersion    = decimal_digits "." decimal_digits ;
+Version         = "v" decimal_digits "." decimal_digits "." decimal_digits [ "-" prerelease ] ;
+prerelease      = identifier { "." identifier } ;
+
+(* module_path_chars: a sequence of non-whitespace ASCII characters
+   matching the pattern [a-zA-Z0-9_.\-/~+]+ — typically a domain
+   path like "github.com/minions/banana-lib". No quoting needed. *)
+module_path_chars = (* see above *) ;
+
+(* ================================================================ *)
+(* End of Bello Grammar                                              *)
+(* ================================================================ *)

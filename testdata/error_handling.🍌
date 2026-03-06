@@ -1,0 +1,10 @@
+kampung jefe
+
+muak "whaaats"
+
+banana main() {
+	err := whaaats.New("demo")
+	if err != nil {
+		poopaye("error")
+	}
+}
