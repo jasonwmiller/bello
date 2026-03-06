@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/minions/bello/pkg/lexer"
-	"github.com/minions/bello/pkg/transformer"
+	"github.com/jasonwmiller/bello/pkg/lexer"
+	"github.com/jasonwmiller/bello/pkg/transformer"
 )
 
 // Emit writes the Go AST into the provided output directory.

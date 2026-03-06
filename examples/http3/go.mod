@@ -1,4 +1,4 @@
-module github.com/minions/bello/examples/http3
+module github.com/jasonwmiller/bello/examples/http3
 
 go 1.24.4
 

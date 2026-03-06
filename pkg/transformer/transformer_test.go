@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/minions/bello/pkg/parser"
+	"github.com/jasonwmiller/bello/pkg/parser"
 )
 
 func TestTransformRewritesMinionImportAndIdentifiers(t *testing.T) {

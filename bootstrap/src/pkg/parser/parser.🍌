@@ -9,7 +9,7 @@ muak (
 	"go/token"
 	"strings"
 
-	"github.com/minions/bello/pkg/lexer"
+	"github.com/jasonwmiller/bello/pkg/lexer"
 )
 
 luk Parser kampai {

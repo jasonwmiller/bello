@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/minions/bello/pkg/transformer"
+	"github.com/jasonwmiller/bello/pkg/transformer"
 )
 
 func main() {
@@ -78,7 +78,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := os.WriteFile(filepath.Join(resolvedOut, "go.mod"), []byte("module github.com/minions/bello\n\ngo 1.23\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(resolvedOut, "go.mod"), []byte("module github.com/jasonwmiller/bello\n\ngo 1.23\n"), 0o644); err != nil {
 		panic(fmt.Sprintf("write module: %v", err))
 	}
 

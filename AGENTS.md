@@ -315,7 +315,7 @@ The transpiler is written in **Go**. This gives:
 - Easy invocation of `go build`, `go test`, `go vet` as subprocesses
 - Path toward Phase 2 (self-hosting: rewrite in Bello, which transpiles to Go)
 
-Use Go modules. The module path is `github.com/minions/bello` (or whatever the actual repo path is).
+Use Go modules. The module path is `github.com/jasonwmiller/bello` (or whatever the actual repo path is).
 
 ---
 

@@ -1,4 +1,4 @@
-module github.com/minions/bello/examples
+module github.com/jasonwmiller/bello/examples
 
 go 1.23
 

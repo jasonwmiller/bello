@@ -9,7 +9,7 @@ import (
 	"go/token"
 	"strings"
 
-	"github.com/minions/bello/pkg/lexer"
+	"github.com/jasonwmiller/bello/pkg/lexer"
 )
 
 // Parser converts Bello source into a Go-compatible AST representation.

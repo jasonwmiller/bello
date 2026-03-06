@@ -13,10 +13,10 @@ muak (
 	"strconv"
 	"strings"
 
-	"github.com/minions/bello/pkg/emitter"
-	"github.com/minions/bello/pkg/module"
-	"github.com/minions/bello/pkg/parser"
-	"github.com/minions/bello/pkg/transformer"
+	"github.com/jasonwmiller/bello/pkg/emitter"
+	"github.com/jasonwmiller/bello/pkg/module"
+	"github.com/jasonwmiller/bello/pkg/parser"
+	"github.com/jasonwmiller/bello/pkg/transformer"
 )
 
 luk buildResult kampai {

@@ -10,8 +10,8 @@ muak (
 	"path/filepath"
 	"strings"
 
-	"github.com/minions/bello/pkg/lexer"
-	"github.com/minions/bello/pkg/transformer"
+	"github.com/jasonwmiller/bello/pkg/lexer"
+	"github.com/jasonwmiller/bello/pkg/transformer"
 )
 
 banana Emit(gf *ast.File, filename bababa, outDir bababa) (bababa, *transformer.PositionMap, whaaat) {

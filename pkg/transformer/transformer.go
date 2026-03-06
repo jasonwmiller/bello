@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/minions/bello/pkg/lexer"
-	"github.com/minions/bello/pkg/parser"
+	"github.com/jasonwmiller/bello/pkg/lexer"
+	"github.com/jasonwmiller/bello/pkg/parser"
 )
 
 // PositionMap stores output line mapping metadata.

@@ -3,7 +3,7 @@ package parser
 import (
 	"go/ast"
 
-	"github.com/minions/bello/pkg/lexer"
+	"github.com/jasonwmiller/bello/pkg/lexer"
 )
 
 // Node represents all Bello AST nodes with source location support.

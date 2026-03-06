@@ -4,7 +4,7 @@
 Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in `bello.bnf` and `bello.spec.md`.
 
 ## Repository bootstrap
-- Initialize Go module `github.com/minions/bello`
+- Initialize Go module `github.com/jasonwmiller/bello`
 - Create package directories:
   - `cmd/bello`
   - `pkg/lexer`

@@ -3,7 +3,7 @@ kampung parser
 muak (
 	"go/ast"
 
-	"github.com/minions/bello/pkg/lexer"
+	"github.com/jasonwmiller/bello/pkg/lexer"
 )
 
 luk Node buddies {
