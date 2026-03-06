@@ -98,16 +98,17 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - Parser: implemented as Bello token translation + Go parser + AST conversion layer (now builds `File.Decls` and statement/expression/type nodes, including switch/type-switch/select forms).
 - Transformer: implemented; stdlib package/method rewrite and `jefe` handling wired.
 - Emitter: implemented with `go/format` output.
-- Module parser: implemented and supports `bello`, `necesita`, `cambio`, grouped/single forms.
+- Module parser: implemented and supports `modulo`, `bello`, `necesita`, `cambio` (single-line and grouped forms).
 - CLI: command pipeline (`papala`, `construccion`, `kanpai`, `sniff`, `bonito`, `dame`, `modulo init`, `splain`) wired.
 - Fixtures: full fixture set has been added in `testdata`.
-- Validation tests: lexer/parser/module/transformer tests added (execution blocked in environment due missing `go` tool).
+- Docs: `README.md` added for setup, commands, and workflow notes.
+- Validation tests: lexer/parser/module/transformer tests pass in local environment.
 
 ### Open work before delivery
 - Finalize `.gitignore` enforcement for all working dirs and wire it into CI/repro checks.
-- add end-to-end command tests (`bello construccion` / `bello kanpai`) when `go` tool is available;
+- add end-to-end command tests (`bello papala`, `bello construccion`, `bello kanpai`, `bello sniff`, `bello bonito`) using fixture workflows;
 - harden parser recovery and error messages to fully match BNF-level recovery requirements;
-- `bonito` now rewrites Go-formatted output back to Bello keywords + predeclared names (`RewriteGoToBelloSource`); continue refining formatting parity with `bello` AST printer for edge cases.
+- continue refining `bonito` formatting parity (spacing/comments and edge-case conversions) while keeping AST round-trip stable.
 
 ## Completion criteria
 - All tests passing locally with fixtures and CLI commands exercised
