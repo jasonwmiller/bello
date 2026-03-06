@@ -155,13 +155,25 @@ func runBonito(file string) {
 
 func runProjectCommand(path string, action string) {
 	requireGoTool()
-	res, err := buildProjectFromBello(path)
+	workOnDir := true
+	var res *buildResult
+	var err error
+	if filepath.Ext(path) == ".🍌" {
+		workOnDir = false
+		res, err = transpileSingle(path)
+	} else {
+		res, err = buildProjectFromBello(path)
+	}
 	if err != nil {
 		fail(err.Error())
 	}
 	defer os.RemoveAll(res.Workdir)
 
-	cmd := exec.Command(resolveGoBinary(), action, "./...")
+	cmdArgs := []string{action, "./..."}
+	if !workOnDir {
+		cmdArgs = []string{action, "."}
+	}
+	cmd := exec.Command(resolveGoBinary(), cmdArgs...)
 	cmd.Dir = res.Workdir
 	var out strings.Builder
 	cmd.Stdout = &out
@@ -243,7 +255,11 @@ func transpile(path, outDir string) (string, *transformer.PositionMap, error) {
 }
 
 func buildProjectFromBello(path string) (*buildResult, error) {
-	root, err := filepath.Abs(path)
+	rootPath := path
+	if filepath.Ext(rootPath) == ".🍌" {
+		rootPath = filepath.Dir(rootPath)
+	}
+	root, err := filepath.Abs(rootPath)
 	if err != nil {
 		return nil, err
 	}
