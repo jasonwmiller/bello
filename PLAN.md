@@ -103,6 +103,7 @@ Build a fully working Bello transpiler pipeline and CLI per the grammar/spec in 
 - Fixtures: full fixture set has been added in `testdata`.
 - Docs: `README.md` added for setup, commands, and workflow notes.
 - Validation tests: lexer/parser/module/transformer tests pass in local environment.
+- Language docs and llms context files are now available (`LANGUAGE.md`, `llms.txt`).
 
 ### Open work before delivery
 - Finalize `.gitignore` enforcement for all working dirs and wire it into CI/repro checks.
